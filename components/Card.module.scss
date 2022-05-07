@@ -1,0 +1,198 @@
+.card, .stack {
+  width: 125px;
+  height: 175px;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  background-clip: padding-box;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  overflow: hidden;
+}
+
+.card {
+  position: relative;
+
+  .background, .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+
+  .top {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    width: 100%;
+    background-color: rgba(255,255,255,0.6);
+  }
+
+  .points {
+    margin: 8px;
+    font-size: 2em;
+    line-height: 100%;
+    font-style: italic;
+    font-weight: 800;
+    color: black;
+    -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+  }
+  .gem {
+    //margin: 8px;
+    position: absolute;
+    right: 5%;
+    top: 20%;
+    height: 60%;
+    width: 25%;
+    background-repeat: no-repeat;
+    background-size: 500% 100%;
+    background-image: url('/images/gems.png');
+  }
+
+  .cost, .cost li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cost {
+    position: absolute;
+    bottom: 5%;
+    left: 5%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    li {
+      width: 24px;
+      height: 24px;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      font-style: italic;
+      font-weight: 900;
+      color: white;
+      -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+      -webkit-text-stroke-width: 1px;
+      -webkit-text-stroke-color: black;
+      border: solid 1px black;
+
+      &.diamond {
+        background-color: white;
+      }
+      &.emerald {
+        background-color: green;
+      }
+      &.ruby {
+        background-color: red;
+      }
+      &.sapphire {
+        background-color: blue
+      }
+      &.onyx {
+        background-color: black;
+        border-color: white;
+      }
+    }
+  }
+
+  &.onyx {
+    .gem { background-position: 0 0; }
+  }
+  &.sapphire {
+    .gem { background-position: 25% 0; }
+  }
+  &.diamond {
+    .gem { background-position: 50% 0; }
+  }
+  &.emerald {
+    .gem { background-position: 75% 0; }
+  }
+  &.ruby {
+    .gem { background-position: 100% 0; }
+  }
+  // &.onyx {
+  //   .top {
+  //     background-color: black;
+  //     color: white;
+  //   }
+  // }
+
+  // &.sapphire {
+  //   .top {
+  //     background-color: blue;
+  //     color: white;
+  //   }
+  // }
+
+  // &.diamond {
+  //   .top {
+  //     background-color: white;
+  //     color: black;
+  //   }
+  // }
+
+  // &.emerald {
+  //   .top {
+  //     background-color: green;
+  //     color: white;
+  //   }
+  // }
+
+  // &.ruby {
+  //   .top {
+  //     background-color: red;
+  //     color: white;
+  //   }
+  // }
+}
+
+.stack {
+  justify-content: flex-end;
+  background-color: green;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  border: solid 5px white;
+  display: flex;
+  flex-direction: column;
+
+  .title {
+    color: yellow;
+    font-size: 1.2em;
+    font-weight: 600;
+    text-align: center;
+    flex-grow: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .level {
+    align-self: center;
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+
+    .pip {
+      width: 10px;
+      height: 10px;
+      border-radius: 10px;
+      background-color: white;
+    }
+  }
+}
