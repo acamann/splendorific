@@ -1,5 +1,4 @@
 import React from "react";
-import { Card as CardType, Gem, NonGoldGem } from "../models";
 import styles from "./Card.module.scss";
 
 type Props = {
@@ -9,7 +8,7 @@ type Props = {
 const Stack = ({
   level
 }: Props) => (
-  <div className={styles.stack}>
+  <div className={styles.stack} data-level={level}>
     <div className={styles.title}>
       Splendorific
     </div>

@@ -74,7 +74,7 @@
     left: 5%;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 
     li {
       width: 24px;
@@ -126,55 +126,26 @@
   &.ruby {
     .gem { background-position: 100% 0; }
   }
-  // &.onyx {
-  //   .top {
-  //     background-color: black;
-  //     color: white;
-  //   }
-  // }
-
-  // &.sapphire {
-  //   .top {
-  //     background-color: blue;
-  //     color: white;
-  //   }
-  // }
-
-  // &.diamond {
-  //   .top {
-  //     background-color: white;
-  //     color: black;
-  //   }
-  // }
-
-  // &.emerald {
-  //   .top {
-  //     background-color: green;
-  //     color: white;
-  //   }
-  // }
-
-  // &.ruby {
-  //   .top {
-  //     background-color: red;
-  //     color: white;
-  //   }
-  // }
 }
 
 .stack {
   justify-content: flex-end;
-  background-color: green;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
   border: solid 5px white;
   display: flex;
   flex-direction: column;
 
+  &[data-level="1"] { background-color: green; }
+  &[data-level="2"] { background-color: yellow; }
+  &[data-level="3"] { background-color: blue; }
+
   .title {
     color: yellow;
     font-size: 1.2em;
     font-weight: 600;
-    text-align: center;
+    text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
+                 0px 8px 13px rgba(0,0,0,0.1),
+                 0px 18px 23px rgba(0,0,0,0.1);
     flex-grow: 1;
     height: 100%;
     display: flex;
