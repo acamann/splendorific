@@ -1,0 +1,45 @@
+@import "../styles/variables.scss";
+
+.chip {
+  width: 80px;
+  height: 80px;
+  border-radius: 80px;
+  border: solid 6px;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  background-color: lightgoldenrodyellow;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .gem {
+    height: 60%;
+    width: 75%;
+    background-repeat: no-repeat;
+    background-size: 500% 100%;
+    background-image: url('/images/gems.png');
+  }
+
+  &.gold {
+    border-color: $gold;
+  }
+  &.onyx {
+    border-color: $onyx;
+    .gem { background-position: 0 0; }
+  }
+  &.sapphire {
+    border-color: $sapphire;
+    .gem { background-position: 25% 0; }
+  }
+  &.diamond {
+    border-color: $diamond;
+    .gem { background-position: 50% 0; }
+  }
+  &.emerald {
+    border-color: $emerald;
+    .gem { background-position: 75% 0; }
+  }
+  &.ruby {
+    border-color: $ruby;
+    .gem { background-position: 100% 0; }
+  }
+}

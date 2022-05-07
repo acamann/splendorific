@@ -28,6 +28,6 @@
 .bank {
   margin: 10px;
   position: relative;
-  height: 100px;
-  width: 500px;
+  display: flex;
+  gap: 8px;
 }
