@@ -43,26 +43,26 @@ const Home: NextPage = () => {
         <button className={styles.shuffle} onClick={() => init()}>Shuffle</button>
 
         <div className={styles.board}>
-          {deck?.one.slice(0, 4)
-            .map((card, i) => (
-              <Card key={i} card={card} />
-            ))
-          }
-          <Stack level={1} />
-
-          {deck?.two.slice(0, 4)
-            .map((card, i) => (
-              <Card key={i} card={card} />
-            ))
-          }
-          <Stack level={2} />
-
+          <Stack level={3} />
           {deck?.three.slice(0, 4)
             .map((card, i) => (
               <Card key={i} card={card} />
             ))
           }
-          <Stack level={3} />
+
+          <Stack level={2} />
+          {deck?.two.slice(0, 4)
+            .map((card, i) => (
+              <Card key={i} card={card} />
+            ))
+          }
+
+          <Stack level={1} />
+          {deck?.one.slice(0, 4)
+            .map((card, i) => (
+              <Card key={i} card={card} />
+            ))
+          }
         </div>
 
         <div className={styles.bank}>
