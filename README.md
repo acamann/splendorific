@@ -1,6 +1,8 @@
 # Splendorific
 
-A Next.js Splendor clone for learning purposes
+A Splendor clone for learning purposes.
+
+Next.js, Typescript, Sass
 
 ## Learning goals:
 
