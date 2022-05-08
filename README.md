@@ -4,8 +4,8 @@ A Next.js Splendor clone for learning purposes
 
 ## Learning goals:
 
- - game instance generation via next.js api
- - css image sprites
+ - game instance generation
+ - css image sprites for cards, gems
  - basic gameplay, store in-game state
  - multiplayer with roomservice https://github.com/getroomservice/examples/tree/master/next.js-todolist
  - simple AI, play against computer with goals
