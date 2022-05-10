@@ -5,6 +5,7 @@ import styles from "./Card.module.scss";
 
 type Props = {
   card: CardType;
+  onClick: () => void;
 }
 
 const getClassNameFromGem = (gem: Gem): string => {
@@ -18,28 +19,11 @@ const getClassNameFromGem = (gem: Gem): string => {
   }
 }
 
-const getRandom = <T,>(arr: T[]): T => arr[~~(Math.random() * arr.length)];
-
-const getImageNumberForGem = (gem: NonGoldGem): string => {
-  switch (gem) {
-    case Gem.Onyx: return getRandom(["1019", "1033", "1075", "1078"]);
-    case Gem.Sapphire: return getRandom(["1015", "1031", "1036", "1038", "1041"]);
-    case Gem.Diamond: return getRandom(["1000", "1021", "1035", "1052"]);
-    case Gem.Emerald: return getRandom(["1003", "101", "1012", "1039", "1053"]);
-    case Gem.Ruby: return getRandom(["1028", "1032", "1047", "1055", "1073"]);
-  }
-}
-
-const imageLoader = (gem: NonGoldGem) => `https://picsum.photos/id/${getImageNumberForGem(gem)}/125/175`;
-
-const Card = ({
-  card
-}: Props) => (
-  <div className={`${styles.card} ${getClassNameFromGem(card.gem)}`}>
+const Card = ({ card, onClick }: Props) => (
+  <div className={`${styles.card} ${getClassNameFromGem(card.gem)}`} onClick={onClick}>
     <div className={styles.background}>
       <Image
-        loader={() => imageLoader(card.gem)}
-        src="https://picsum.photos/125/175/"
+        src={`https://picsum.photos/id/${card.imageId}/125/175`}
         layout="fill"
         alt=""
       />

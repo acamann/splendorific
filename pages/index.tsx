@@ -2,19 +2,53 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import Card from '../components/Card'
+import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
 import Stack from '../components/Stack'
-import { Card as CardType, Gem } from '../models'
+import { Card as CardType, Gem, Level, Decks } from '../models'
 import styles from '../styles/Home.module.css'
 
-type Decks = {
-  one: CardType[],
-  two: CardType[],
-  three: CardType[]
-}
+const allGems = (Object.keys(Gem)
+  .filter(key => isNaN(Number(key))) as (keyof typeof Gem)[])
+  .map(key => Gem[key]);
+
+// type BankState = {
+//   [key in Gem]: number;
+// }
+
+// type BankAction = {
+//   type: "TAKE" | "RETURN",
+//   gem: Gem,
+// }
+// const initialBank = {
+//   [Gem.Diamond]: 7,
+//   [Gem.Onyx]: 7,
+//   [Gem.Emerald]: 7,
+//   [Gem.Ruby]: 7,
+//   [Gem.Sapphire]: 7,
+//   [Gem.Gold]: 7,
+// };
+
+// const bankReducer = (state: BankState, action: BankAction): BankState => {
+//   switch (action.type) {
+//     case 'TAKE':
+//       return {
+//         ...state,
+//         [action.gem]: state[action.gem] - 1
+//       };
+//     case 'RETURN':
+//       return {
+//         ...state,
+//         [action.gem]: state[action.gem] + 1
+//       };
+//     default:
+//       throw new Error();
+//   }
+// }
 
 const Home: NextPage = () => {
   const [deck, setDeck] = useState<Decks>();
+  //const [bank, bankDispatch] = useReducer(bankReducer, initialBank);
 
   // https://dev.to/codymjarrett/understanding-how-api-routes-work-in-next-js-50fm
   const init = async () => {
@@ -26,6 +60,20 @@ const Home: NextPage = () => {
     const responseJson: Decks = await response.json();
     setDeck(responseJson);
   };
+
+  const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+    if (deck) {
+      const newDeck = [...deck[level]];
+      if (deck[level].length > 4) {
+        const replacement = deck[level][4];
+        newDeck.splice(index, 1, replacement);
+        newDeck.splice(4, 1);
+      } else {
+        newDeck.splice(index, 1);
+      }
+      setDeck({ ...deck, [level]: newDeck });
+    }
+  }
 
   useEffect(() => {
     init();
@@ -43,35 +91,26 @@ const Home: NextPage = () => {
         <button className={styles.shuffle} onClick={() => init()}>Shuffle</button>
 
         <div className={styles.board}>
-          <Stack level={3} />
-          {deck?.three.slice(0, 4)
-            .map((card, i) => (
-              <Card key={i} card={card} />
-            ))
-          }
-
-          <Stack level={2} />
-          {deck?.two.slice(0, 4)
-            .map((card, i) => (
-              <Card key={i} card={card} />
-            ))
-          }
-
-          <Stack level={1} />
-          {deck?.one.slice(0, 4)
-            .map((card, i) => (
-              <Card key={i} card={card} />
-            ))
-          }
+          {deck ? (
+            [3, 2, 1] as Level[]).map(level => (
+              <>
+                {deck[level].length > 4 ? <Stack level={level} /> : <CardPlaceholder />}
+                {deck[level].slice(0, 4).map((card, i) => (
+                  <Card key={i}
+                    card={card}
+                    onClick={() => takeCard(level, i, card)}
+                  />
+                ))}
+                {deck[level].length < 4 ? Array.from(Array(4 - deck[level].length)).map((_, i) => 
+                  <CardPlaceholder key={i} />
+                ) : undefined}
+              </>
+            )
+          ) : undefined}
         </div>
 
         <div className={styles.bank}>
-          <Chip gem={Gem.Gold} />
-          <Chip gem={Gem.Emerald} />
-          <Chip gem={Gem.Ruby} />
-          <Chip gem={Gem.Sapphire} />
-          <Chip gem={Gem.Diamond} />
-          <Chip gem={Gem.Onyx} />
+          {allGems.map(gem => <Chip key={gem} gem={gem} />)}
         </div>
 
       </main>
