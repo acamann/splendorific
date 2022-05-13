@@ -21,12 +21,21 @@
 .card {
   position: relative;
 
+  :hover {
+    cursor: pointer;
+  }
+
   .background, .content {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+  }
+
+  .background {
+    background-size: 500% 500%;
+    background-image: url('/images/cards.png');
   }
 
   .content {
@@ -119,19 +128,32 @@
   }
 
   &.onyx {
+    .background { background-position-y: 75%; }
     .gem { background-position: 0 0; }
   }
   &.sapphire {
+    .background { background-position-y: 100%; }
     .gem { background-position: 25% 0; }
   }
   &.diamond {
+    .background { background-position-y: 50%; }
     .gem { background-position: 50% 0; }
   }
   &.emerald {
+    .background { background-position-y: 0; }
     .gem { background-position: 75% 0; }
   }
   &.ruby {
+    .background { background-position-y: 25%; }
     .gem { background-position: 100% 0; }
+  }
+
+  .background {
+    &[data-image-id="0"] { background-position-x: 0; }
+    &[data-image-id="1"] { background-position-x: 25%; }
+    &[data-image-id="2"] { background-position-x: 50%; }
+    &[data-image-id="3"] { background-position-x: 75%; }
+    &[data-image-id="4"] { background-position-x: 100%; }
   }
 }
 

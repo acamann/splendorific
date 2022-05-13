@@ -15,16 +15,6 @@ const getGemFromColor = (color: CardColor): NonGoldGem => {
   }
 }
 
-const getImageIdForGem = (gem: NonGoldGem): number => {
-  switch (gem) {
-    case Gem.Onyx: return pickRandom([1019, 1033, 1075, 1078]);
-    case Gem.Sapphire: return pickRandom([1015, 1031, 1036, 1038, 1041]);
-    case Gem.Diamond: return pickRandom([1000, 1021, 1035, 1052]);
-    case Gem.Emerald: return pickRandom([1003, 101, 1012, 1039, 1053]);
-    case Gem.Ruby: return pickRandom([1028, 1032, 1047, 1055, 1073]);
-  }
-}
-
 export const deck: Card[] = cards.map(card => ({
   level: card.Level as 1 | 2 | 3,
   gem: getGemFromColor(card.Color as CardColor),
@@ -36,5 +26,5 @@ export const deck: Card[] = cards.map(card => ({
     ...Array(card.Green).fill(Gem.Emerald),
     ...Array(card.Red).fill(Gem.Ruby),
   ] as NonGoldGem[],
-  imageId: getImageIdForGem(getGemFromColor(card.Color as CardColor))
+  imageId: pickRandom([0, 1, 2, 3, 4])
 }));

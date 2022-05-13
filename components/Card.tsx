@@ -1,5 +1,4 @@
 import React from "react";
-import Image from 'next/image'
 import { Card as CardType, Gem, NonGoldGem } from "../models";
 import styles from "./Card.module.scss";
 
@@ -21,12 +20,7 @@ const getClassNameFromGem = (gem: Gem): string => {
 
 const Card = ({ card, onClick }: Props) => (
   <div className={`${styles.card} ${getClassNameFromGem(card.gem)}`} onClick={onClick}>
-    <div className={styles.background}>
-      <Image
-        src={`https://picsum.photos/id/${card.imageId}/125/175`}
-        layout="fill"
-        alt=""
-      />
+    <div className={styles.background} data-image-id={card.imageId}>
     </div>
     <div className={styles.content}>
       <div className={styles.top}>
