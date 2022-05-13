@@ -4,8 +4,15 @@ import { useEffect, useState } from 'react'
 import Card from '../components/Card'
 import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
+import Noble from '../components/Noble'
 import Stack from '../components/Stack'
-import { Card as CardType, Gem, Level, Decks } from '../models'
+import {
+  Card as CardType,
+  Gem,
+  Level,
+  Decks,
+  Noble as NobleType
+} from '../models'
 import styles from '../styles/Home.module.css'
 
 const allGems = (Object.keys(Gem)
@@ -48,17 +55,25 @@ const allGems = (Object.keys(Gem)
 
 const Home: NextPage = () => {
   const [deck, setDeck] = useState<Decks>();
+  const [nobles, setNobles] = useState<NobleType[]>();
   //const [bank, bankDispatch] = useReducer(bankReducer, initialBank);
 
-  // https://dev.to/codymjarrett/understanding-how-api-routes-work-in-next-js-50fm
   const init = async () => {
-    const response = await fetch("/api/deck");
-    if (!response.ok) {
-      console.log(response.status);
+    const nobleResponse = await fetch("/api/nobles/4");
+    if (!nobleResponse.ok) {
+      console.log(nobleResponse.status);
       return;
     }
-    const responseJson: Decks = await response.json();
-    setDeck(responseJson);
+    const nobleJson: NobleType[] = await nobleResponse.json();
+    setNobles(nobleJson);
+
+    const deckResponse = await fetch("/api/deck");
+    if (!deckResponse.ok) {
+      console.log(deckResponse.status);
+      return;
+    }
+    const deckJson: Decks = await deckResponse.json();
+    setDeck(deckJson);
   };
 
   const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
@@ -75,6 +90,10 @@ const Home: NextPage = () => {
     }
   }
 
+  const takeNoble = (noble: NobleType, index: number) => {
+    console.log(noble);
+  }
+
   useEffect(() => {
     init();
   }, [])
@@ -89,6 +108,17 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <button className={styles.shuffle} onClick={() => init()}>Shuffle</button>
+
+        <div className={styles.nobles}>
+          {nobles ? (
+            nobles.map((noble, i) => (
+              <Noble key={i}
+                noble={noble}
+                onClick={() => takeNoble(noble, i)}
+              />
+            ))
+          ) : undefined}
+        </div>
 
         <div className={styles.board}>
           {deck ? (

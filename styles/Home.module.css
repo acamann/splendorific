@@ -18,6 +18,12 @@
   right: 10px;
 }
 
+.nobles {
+  display: flex;
+  gap: 20px;
+  margin: 10px;
+}
+
 .board {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;

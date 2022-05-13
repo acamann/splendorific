@@ -1,0 +1,116 @@
+@import "../styles/variables.scss";
+
+.noble {
+  width: 125px;
+  height: 125px;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  background-clip: padding-box;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
+            rgba(0, 0, 0, 0.3) 0px 7px 13px -3px;
+  overflow: hidden;
+}
+
+.placeholder {
+  width: 125px;
+  height: 125px;
+}
+
+.noble {
+  position: relative;
+
+  :hover {
+    cursor: pointer;
+  }
+
+  .background, .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .background {
+    background-image: url('/images/face.JPG');
+    background-size: cover;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+
+  .left {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 30px;
+    height: 100%;
+    background-color: rgba(255,255,255,0.6);
+  }
+
+  .points {
+    font-size: 2em;
+    line-height: 100%;
+    font-style: italic;
+    font-weight: 800;
+    color: black;
+    -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+  }
+
+  .cost, .cost li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cost {
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    li {
+      width: 18px;
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      font-style: italic;
+      font-weight: 900;
+      color: white;
+      -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+      -webkit-text-stroke-width: 1px;
+      -webkit-text-stroke-color: black;
+      border: solid 1px black;
+
+      &.white {
+        background-color: $diamond;
+      }
+      &.green {
+        background-color: $emerald;
+      }
+      &.red {
+        background-color: $ruby;
+      }
+      &.blue {
+        background-color: $sapphire;
+      }
+      &.black {
+        background-color: $onyx;
+        border-color: white;
+      }
+    }
+  }
+}
