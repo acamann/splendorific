@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { nobleDeck } from '../../../data/nobleDeck';
+import { nobleDeck } from '../../../data/nobles';
 import { Noble } from '../../../models';
 import { shuffle } from '../../../utils/array';
 

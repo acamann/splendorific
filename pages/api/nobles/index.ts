@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Noble } from '../../../models';
 import { shuffle } from '../../../utils/array';
-import { nobleDeck } from '../../../data/nobleDeck';
+import { nobleDeck } from '../../../data/nobles';
 
 export default function handler(
   req: NextApiRequest,

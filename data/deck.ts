@@ -1,8 +1,7 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { Card, Decks, Gem, NonGoldGem } from '../../models';
-import cards from '../../data/cards.json';
-import { pickRandom, shuffle } from '../../utils/array';
+
+import cards from './cards.json';
+import { Card, Gem, NonGoldGem } from "../models";
+import { pickRandom } from "../utils/array";
 
 type CardColor = "Black" | "Blue" | "White" | "Green" | "Red";
 
@@ -26,7 +25,7 @@ const getImageIdForGem = (gem: NonGoldGem): number => {
   }
 }
 
-const deck: Card[] = cards.map(card => ({
+export const deck: Card[] = cards.map(card => ({
   level: card.Level as 1 | 2 | 3,
   gem: getGemFromColor(card.Color as CardColor),
   points: card.PV as 1 | 2 | 3 | 4 | 5,
@@ -39,17 +38,3 @@ const deck: Card[] = cards.map(card => ({
   ] as NonGoldGem[],
   imageId: getImageIdForGem(getGemFromColor(card.Color as CardColor))
 }));
-
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Decks>
-) {
-  if (req.method === 'GET') {
-    shuffle(deck);
-    res.status(200).json({
-      [1]: deck.filter(card => card.level === 1),
-      [2]: deck.filter(card => card.level === 2),
-      [3]: deck.filter(card => card.level === 3)
-    });
-  }
-}
