@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { Card, Decks, Gem, NonGoldGem } from '../../models';
 import cards from '../../data/cards.json';
+import { pickRandom, shuffle } from '../../utils/array';
 
 type CardColor = "Black" | "Blue" | "White" | "Green" | "Red";
 
@@ -15,22 +16,13 @@ const getGemFromColor = (color: CardColor): NonGoldGem => {
   }
 }
 
-const shuffle = (array: Card[]) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-const getRandom = <T,>(arr: T[]): T => arr[~~(Math.random() * arr.length)];
-
 const getImageIdForGem = (gem: NonGoldGem): number => {
   switch (gem) {
-    case Gem.Onyx: return getRandom([1019, 1033, 1075, 1078]);
-    case Gem.Sapphire: return getRandom([1015, 1031, 1036, 1038, 1041]);
-    case Gem.Diamond: return getRandom([1000, 1021, 1035, 1052]);
-    case Gem.Emerald: return getRandom([1003, 101, 1012, 1039, 1053]);
-    case Gem.Ruby: return getRandom([1028, 1032, 1047, 1055, 1073]);
+    case Gem.Onyx: return pickRandom([1019, 1033, 1075, 1078]);
+    case Gem.Sapphire: return pickRandom([1015, 1031, 1036, 1038, 1041]);
+    case Gem.Diamond: return pickRandom([1000, 1021, 1035, 1052]);
+    case Gem.Emerald: return pickRandom([1003, 101, 1012, 1039, 1053]);
+    case Gem.Ruby: return pickRandom([1028, 1032, 1047, 1055, 1073]);
   }
 }
 

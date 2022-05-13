@@ -25,5 +25,9 @@ export type Decks = {
 
 export type Noble = {
   points: 3,
-  cardCost: NonGoldGem[]
+  black: number,
+  blue: number,
+  red: number,
+  white: number,
+  green: number,
 }
