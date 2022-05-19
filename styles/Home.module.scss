@@ -37,3 +37,19 @@
   display: flex;
   gap: 8px;
 }
+
+.player {
+  background-color:rgba(255, 255, 255, 0.5);;
+  border-radius: 24px;
+  padding: 24px;
+
+  -webkit-transform:scale(0.75);
+  -moz-transform:scale(0.75);
+  -ms-transform:scale(0.75);
+  transform:scale(0.75);
+
+  .cards {
+    display: flex;
+    gap: 8px;
+  }
+}

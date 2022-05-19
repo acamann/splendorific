@@ -1,11 +1,12 @@
 import { Dispatch, useReducer } from "react";
-import { Card, Decks, Gem, Noble } from "../models";
+import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
 
 type GameState = {
-  bank: { [gem in Gem]: number };
+  bank: Bank;
   decks: "Loading" | Decks;
   nobles: "Loading" | Noble[];
-  //players
+  players: Player[];
+  currentPlayerIndex: number;
 }
 
 const initialState: GameState = {
@@ -22,6 +23,21 @@ const initialState: GameState = {
     [2]: [],
     [3]: []
   },
+  nobles: [],
+  players: [],
+  currentPlayerIndex: 0,
+}
+
+const initialPlayerState: Player = {
+  bank: {
+    [Gem.Diamond]: 0,
+    [Gem.Onyx]: 0,
+    [Gem.Emerald]: 0,
+    [Gem.Ruby]: 0,
+    [Gem.Sapphire]: 0,
+    [Gem.Gold]: 0,
+  },
+  cards: [],
   nobles: []
 }
 
@@ -57,8 +73,6 @@ type NoblesAction = {
 
 type Action = GameAction | BankAction | DeckAction | NoblesAction;
 
-const asyncActionHandler = {}
-
 const reducer = (state: GameState, action: Action): GameState => {
   switch (action.type) {
     case 'NEW_GAME': {
@@ -85,29 +99,30 @@ const reducer = (state: GameState, action: Action): GameState => {
         }
       });
 
+      let bankChips = 7;
+      if (action.players === 3) {
+        bankChips = 5;
+      }
+      if (action.players === 2) {
+        bankChips = 4;
+      }
+
+      const bank: Bank = {
+        [Gem.Diamond]: bankChips,
+        [Gem.Onyx]: bankChips,
+        [Gem.Emerald]: bankChips,
+        [Gem.Ruby]: bankChips,
+        [Gem.Sapphire]: bankChips,
+        [Gem.Gold]: 7, // leave the gold chips alone
+      }
+
       return {
         ...state,
         decks: "Loading",
-        nobles: "Loading"
+        nobles: "Loading",
+        players: Array(action.players).fill(initialPlayerState),
+        bank
       }
-    };
-    case 'TAKE_GEM': {
-      return {
-        ...state,
-        bank: {
-          ...state.bank,
-          [action.gem]: state.bank[action.gem] - 1
-        }
-      };
-    };
-    case 'RETURN_GEM': {
-      return {
-        ...state,
-        bank: {
-          ...state.bank,
-          [action.gem]: state.bank[action.gem] + 1
-        }
-      };
     };
     case 'SET_DECKS': {
       return {
@@ -121,11 +136,57 @@ const reducer = (state: GameState, action: Action): GameState => {
         nobles: action.nobles
       };
     };
+    case 'TAKE_GEM': {
+      return {
+        ...state,
+        bank: {
+          ...state.bank,
+          [action.gem]: state.bank[action.gem] - 1
+        },
+        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
+          ...player,
+          bank: {
+            ...player.bank,
+            [action.gem]: player.bank[action.gem] + 1
+          }
+        }) : player)
+      };
+    };
+    case 'RETURN_GEM': {
+      return {
+        ...state,
+        bank: {
+          ...state.bank,
+          [action.gem]: state.bank[action.gem] + 1
+        },
+        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
+          ...player,
+          bank: {
+            ...player.bank,
+            [action.gem]: player.bank[action.gem] - 1
+          }
+        }) : player)
+      };
+    };
     case 'PURCHASE_CARD': {
       if (state.decks === "Loading") {
         return { ...state }
       }
+
       const { level, card, index } = action;
+
+      const bank = { ...state.bank };
+      const playerBank = { ...state.players[state.currentPlayerIndex].bank };
+      for (const gem of card.cost) {
+        if (playerBank[gem] > 0) {
+          playerBank[gem]--;
+          bank[gem]++;
+        } else {
+          console.log("Cannot afford");
+          return { ...state }
+        }
+      };
+
       const newDeck = [...state.decks[level]];
       if (state.decks[level].length > 4) {
         const replacement = state.decks[level][4];
@@ -134,12 +195,32 @@ const reducer = (state: GameState, action: Action): GameState => {
       } else {
         newDeck.splice(index, 1);
       }
+
       return {
         ...state,
         decks: {
           ...state.decks,
           [level]: newDeck
-        }
+        },
+        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
+          ...player,
+          cards: [...player.cards, card],
+          bank: playerBank
+        }) : player),
+        bank: bank
+      }
+    }
+    case 'TAKE_NOBLE': {
+      if (state.nobles === "Loading") {
+        return { ...state }
+      }
+      const { noble, index } = action;
+      if (index > state.nobles.length || index < 0) {
+        throw new Error("Nobles array index out of range")
+      }
+      return {
+        ...state,
+        nobles: [...state.nobles.slice(0, index), ...state.nobles.slice(index + 1)]
       }
     }
     default:

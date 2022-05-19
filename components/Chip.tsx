@@ -4,6 +4,8 @@ import styles from "./Chip.module.scss";
 
 type Props = {
   gem: Gem;
+  count: number;
+  onClick: (gem: Gem) => void;
 }
 
 const getClassNameFromGem = (gem: Gem): string => {
@@ -17,9 +19,9 @@ const getClassNameFromGem = (gem: Gem): string => {
   }
 }
 
-const Chip = ({ gem }: Props) => (
-  <div className={`${styles.chip} ${getClassNameFromGem(gem)}`}>
-    <div className={styles.gem}></div>
+const Chip = ({ gem, count, onClick }: Props) => (
+  <div className={`${styles.chip} ${getClassNameFromGem(gem)}`} onClick={() => onClick(gem)}>
+    <div className={styles.gem}>{count}</div>
   </div>
 );
 

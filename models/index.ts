@@ -9,6 +9,8 @@ export enum Gem {
 
 export type NonGoldGem = Exclude<Gem, Gem.Gold>;
 
+export type Bank = { [gem in Gem]: number }
+
 export type Level = 1 | 2 | 3;
 
 export type Card = {
@@ -30,4 +32,10 @@ export type Noble = {
   red: number,
   white: number,
   green: number,
+}
+
+export type Player = {
+  bank: Bank;
+  cards: Card[];
+  nobles: Noble[];
 }

@@ -13,7 +13,7 @@ import {
   Level,
   Noble as NobleType
 } from '../models'
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.scss'
 
 const allGems = (Object.keys(Gem)
   .filter(key => isNaN(Number(key))) as (keyof typeof Gem)[])
@@ -31,7 +31,15 @@ const Home: NextPage = () => {
   }
 
   const takeNoble = (noble: NobleType, index: number) => {
-    console.log(noble);
+    dispatch({ type: "TAKE_NOBLE", noble, index });
+  }
+
+  const takeGem = (gem: Gem) => {
+    dispatch({ type: "TAKE_GEM", gem });
+  }
+
+  const returnGem = (gem: Gem) => {
+    dispatch({ type: "RETURN_GEM", gem });
   }
 
   useEffect(() => {
@@ -80,9 +88,45 @@ const Home: NextPage = () => {
         </div>
 
         <div className={styles.bank}>
-          {allGems.map(gem => <Chip key={gem} gem={gem} />)}
+          {allGems.map(gem => game.bank[gem] > 0 ? (
+            <Chip
+              key={gem}
+              gem={gem}
+              count={game.bank[gem]}
+              onClick={() => takeGem(gem)}
+            />
+          ) : undefined)}
         </div>
 
+        {game.players.map((player, index) => (
+          <div className={styles.player} key={index}>
+            <div className={styles.name}>Player {index + 1}</div>
+            <div className={styles.bank}>
+              {allGems.map(gem => player.bank[gem] > 0 ? (
+                <Chip
+                  key={gem}
+                  gem={gem}
+                  count={player.bank[gem]}
+                  onClick={() => returnGem(gem)}
+                />
+              ) : undefined)}
+            </div>
+            <div className={styles.cards}>
+              {player.cards.map((card, i) => (
+                <Card key={i}
+                  card={card}
+                  onClick={() => undefined}
+                />
+              ))}
+            </div>
+            {player.nobles.map((noble, i) => (
+              <Noble key={i}
+                noble={noble}
+                onClick={() => undefined}
+              />
+            ))}
+          </div>
+        ))}
       </main>
     </div>
   )
