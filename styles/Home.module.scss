@@ -43,13 +43,26 @@
   border-radius: 24px;
   padding: 24px;
 
-  -webkit-transform:scale(0.75);
-  -moz-transform:scale(0.75);
-  -ms-transform:scale(0.75);
-  transform:scale(0.75);
+  -webkit-transform:scale(0.7);
+  -moz-transform:scale(0.7);
+  -ms-transform:scale(0.7);
+  transform:scale(0.7);
 
   .cards {
     display: flex;
     gap: 8px;
   }
+}
+
+@media (max-width: 480px) {
+  .container, .main {
+    padding: 0;
+  }
+
+  .main {
+    align-items: flex-start;
+  }
+
+  .nobles, .board { gap: 10px; padding-right: 10px; }
+  .bank { gap: 4px; }
 }
