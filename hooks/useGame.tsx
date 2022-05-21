@@ -1,24 +1,18 @@
 import { Dispatch, useReducer } from "react";
-import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
+import { Bank, Card, Decks, EMPTY_BANK, Gem, Noble, Player } from "../models";
+import { getBankValueOfCards, isValidGemAction } from "../utils/validation";
 
-// TODO: add error to state, used to notify of invalid step, etc
 type GameState = {
   bank: Bank;
   decks: "Loading" | Decks;
   nobles: "Loading" | Noble[];
   players: Player[];
   currentPlayerIndex: number;
+  message: string;
 }
 
 const initialState: GameState = {
-  bank: {
-    [Gem.Diamond]: 7,
-    [Gem.Onyx]: 7,
-    [Gem.Emerald]: 7,
-    [Gem.Ruby]: 7,
-    [Gem.Sapphire]: 7,
-    [Gem.Gold]: 7,
-  },
+  bank: EMPTY_BANK,
   decks: {
     [1]: [],
     [2]: [],
@@ -27,17 +21,11 @@ const initialState: GameState = {
   nobles: [],
   players: [],
   currentPlayerIndex: 0,
+  message: ""
 }
 
 const initialPlayerState: Player = {
-  bank: {
-    [Gem.Diamond]: 0,
-    [Gem.Onyx]: 0,
-    [Gem.Emerald]: 0,
-    [Gem.Ruby]: 0,
-    [Gem.Sapphire]: 0,
-    [Gem.Gold]: 0,
-  },
+  bank: EMPTY_BANK,
   cards: [],
   nobles: []
 }
@@ -47,35 +35,29 @@ type GameAction = {
   players: 2 | 3 | 4,
   dispatch: Dispatch<Action>;
 } | {
-  type: "NEXT_PLAYER"
-}
-
-// TODO: refactor these so that it is a full valid action (rather than take/return single gem)
-type BankAction = {
-  type: "TAKE_GEM" | "RETURN_GEM",
-  gem: Gem,
-}
-
-type DeckAction = {
-  type: "PURCHASE_CARD" | "RESERVE_CARD",
-  card: Card,
-  level: 1 | 2 | 3,
-  index: number,
-} | {
   type: "SET_DECKS",
   decks: Decks
-}
-
-type NoblesAction = {
-  type: "TAKE_NOBLE",
-  noble: Noble,
-  index: number
 } | {
   type: "SET_NOBLES",
   nobles: Noble[]
 }
 
-type Action = GameAction | BankAction | DeckAction | NoblesAction;
+type PlayerAction = {
+  type: "TAKE_GEMS",
+  gems: Gem[]
+} | {
+  type: "RESERVE_CARD",
+  card: Card,
+  level: 1 | 2 | 3,
+  index: number
+} | {
+  type: "PURCHASE_CARD",
+  card: Card,
+  source: { deck: 1 | 2 | 3 } | "reserved",
+  index: number
+}
+
+type Action = GameAction | PlayerAction;
 
 const reducer = (state: GameState, action: Action): GameState => {
   switch (action.type) {
@@ -125,7 +107,8 @@ const reducer = (state: GameState, action: Action): GameState => {
         decks: "Loading",
         nobles: "Loading",
         players: Array(action.players).fill(initialPlayerState),
-        bank
+        bank,
+        currentPlayerIndex: 0
       }
     };
     case 'SET_DECKS': {
@@ -140,36 +123,29 @@ const reducer = (state: GameState, action: Action): GameState => {
         nobles: action.nobles
       };
     };
-    case 'TAKE_GEM': {
+    case 'TAKE_GEMS': {
+      if (!isValidGemAction(action.gems, state.bank)) {
+        return {
+          ...state,
+          message: "Invalid action"
+        }
+      }
+
+      const bank = { ...state.bank };
+      const playerBank = { ...state.players[state.currentPlayerIndex].bank };
+      for (const gem of action.gems) {
+        playerBank[gem]++;
+        bank[gem]--;
+      }
+
       return {
         ...state,
-        bank: {
-          ...state.bank,
-          [action.gem]: state.bank[action.gem] - 1
-        },
+        bank: bank,
         players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
           ...player,
-          bank: {
-            ...player.bank,
-            [action.gem]: player.bank[action.gem] + 1
-          }
-        }) : player)
-      };
-    };
-    case 'RETURN_GEM': {
-      return {
-        ...state,
-        bank: {
-          ...state.bank,
-          [action.gem]: state.bank[action.gem] + 1
-        },
-        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
-          ...player,
-          bank: {
-            ...player.bank,
-            [action.gem]: player.bank[action.gem] - 1
-          }
-        }) : player)
+          bank: playerBank
+        }) : player),
+        currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       };
     };
     case 'PURCHASE_CARD': {
@@ -177,59 +153,63 @@ const reducer = (state: GameState, action: Action): GameState => {
         return { ...state }
       }
 
-      const { level, card, index } = action;
+      const { source, card, index } = action;
 
       const bank = { ...state.bank };
       const playerBank = { ...state.players[state.currentPlayerIndex].bank };
+      const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
       for (const gem of card.cost) {
-        if (playerBank[gem] > 0) {
+        if (playerCardValues[gem] > 0) {
+          playerCardValues[gem]--; //
+        } else if (playerBank[gem] > 0) {
           playerBank[gem]--;
           bank[gem]++;
+        } else if (playerBank[Gem.Gold] > 0) {
+          playerBank[Gem.Gold]--;
+          bank[Gem.Gold]++;
         } else {
-          console.log("Cannot afford");
-          return { ...state }
+          return {
+            ...state,
+            message: "Cannot afford"
+          }
         }
       };
 
-      const newDeck = [...state.decks[level]];
-      if (state.decks[level].length > 4) {
-        const replacement = state.decks[level][4];
-        newDeck.splice(index, 1, replacement);
-        newDeck.splice(4, 1);
+      let newDecks = { ...state.decks };
+      if (source === "reserved") {
+        // do stuff to purchase reserved card (different action)
       } else {
-        newDeck.splice(index, 1);
+        const newDeck = [...state.decks[source.deck]];
+        if (state.decks[source.deck].length > 4) {
+          const replacement = state.decks[source.deck][4];
+          newDeck.splice(index, 1, replacement);
+          newDeck.splice(4, 1);
+        } else {
+          newDeck.splice(index, 1);
+        }
+        newDecks = {
+          ...state.decks,
+          [source.deck]: newDeck
+        }
       }
+
+      // does this card qualify you for a noble?? if so, let's give it!
+      // return {
+      //   ...state,
+      //   nobles: [...state.nobles.slice(0, index), ...state.nobles.slice(index + 1)]
+      // }
+
+      // let's update your player points at this moment as a result of any cards + nobles
 
       return {
         ...state,
-        decks: {
-          ...state.decks,
-          [level]: newDeck
-        },
+        decks: newDecks,
         players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
           ...player,
           cards: [...player.cards, card],
           bank: playerBank
         }) : player),
-        bank: bank
-      }
-    }
-    case 'TAKE_NOBLE': {
-      if (state.nobles === "Loading") {
-        return { ...state }
-      }
-      const { noble, index } = action;
-      if (index > state.nobles.length || index < 0) {
-        throw new Error("Nobles array index out of range")
-      }
-      return {
-        ...state,
-        nobles: [...state.nobles.slice(0, index), ...state.nobles.slice(index + 1)]
-      }
-    }
-    case 'NEXT_PLAYER': {
-      return {
-        ...state,
+        bank: bank,
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }

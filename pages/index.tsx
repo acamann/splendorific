@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Card from '../components/Card'
 import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
@@ -8,42 +8,45 @@ import Noble from '../components/Noble'
 import Stack from '../components/Stack'
 import useGame from '../hooks/useGame'
 import {
+  ALL_GEMS,
   Card as CardType,
   Gem,
-  Level,
-  Noble as NobleType
+  Level
 } from '../models'
 import styles from '../styles/Home.module.scss'
-
-const allGems = (Object.keys(Gem)
-  .filter(key => isNaN(Number(key))) as (keyof typeof Gem)[])
-  .map(key => Gem[key]);
+import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation'
 
 const Home: NextPage = () => {
   const [game, dispatch] = useGame();
+  const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
 
   const newGame = async ({ players }: { players: 2 | 3 | 4 }) => {
     dispatch({ type: "NEW_GAME", players, dispatch });
   };
 
   const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
-    // TODO: more game logic in here for draft turns, not dispatched to game until valid & committed
-    dispatch({ type: "PURCHASE_CARD", card, level, index });
-    dispatch({ type: "NEXT_PLAYER" });
+    if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
+      dispatch({ type: "PURCHASE_CARD", card, source: { deck: level }, index });
+    }
   }
 
-  const takeNoble = (noble: NobleType, index: number) => {
-    dispatch({ type: "TAKE_NOBLE", noble, index });
-    dispatch({ type: "NEXT_PLAYER" });
+  const considerGem = (gem: Gem) => {
+    if (areValidGemsToConsider([...consideredGems, gem], game.bank)) {
+      setConsideredGems(previous => [...previous, gem]);
+    }
   }
 
-  const takeGem = (gem: Gem) => {
-    dispatch({ type: "TAKE_GEM", gem });
-    dispatch({ type: "NEXT_PLAYER" });
+  const takeConsideredGems = () => {
+    if (isValidGemAction(consideredGems, game.bank)) {
+      dispatch({ type: "TAKE_GEMS", gems: consideredGems });
+      setConsideredGems([]);
+    }
   }
 
-  const returnGem = (gem: Gem) => {
-    dispatch({ type: "RETURN_GEM", gem });
+  const returnConsideredGem = (gemIndex: number) => {
+    if (gemIndex >= 0 && gemIndex < consideredGems.length) {
+      setConsideredGems(previous => previous.filter((gem, i) => i !== gemIndex));
+    }
   }
 
   useEffect(() => {
@@ -75,10 +78,7 @@ const Home: NextPage = () => {
           <div className={styles.nobles}>
             {game.nobles !== "Loading" ? (
               game.nobles.map((noble, i) => (
-                <Noble key={i}
-                  noble={noble}
-                  onClick={() => takeNoble(noble, i)}
-                />
+                <Noble key={i} noble={noble} />
               ))
             ) : undefined}
           </div>
@@ -103,12 +103,12 @@ const Home: NextPage = () => {
           </div>
 
           <div className={styles.bank}>
-            {allGems.map(gem => game.bank[gem] > 0 ? (
+            {ALL_GEMS.map(gem => game.bank[gem] > 0 ? (
               <Chip
                 key={gem}
                 gem={gem}
-                count={game.bank[gem]}
-                onClick={() => takeGem(gem)}
+                count={game.bank[gem] - consideredGems.filter(consideredGem => consideredGem === gem).length}
+                onClick={() => considerGem(gem)}
               />
             ) : undefined)}
           </div>
@@ -120,13 +120,22 @@ const Home: NextPage = () => {
               className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : undefined}`}
             >
               <div className={styles.name}>Player {index + 1}</div>
+              {index === game.currentPlayerIndex && consideredGems.length > 0 ? (
+                <div className={styles.draftGems}>
+                  {consideredGems.map((gem, index) => (
+                    <Chip key={index} gem={gem} onClick={() => returnConsideredGem(index)} />
+                  ))}
+                  <button onClick={() => takeConsideredGems()}>
+                    Confirm
+                  </button>
+                </div>
+              ) : undefined}
               <div className={styles.bank}>
-                {allGems.map(gem => player.bank[gem] > 0 ? (
+                {ALL_GEMS.map(gem => player.bank[gem] > 0 ? (
                   <Chip
                     key={gem}
                     gem={gem}
                     count={player.bank[gem]}
-                    onClick={() => returnGem(gem)}
                   />
                 ) : undefined)}
               </div>

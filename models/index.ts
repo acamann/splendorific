@@ -7,9 +7,22 @@ export enum Gem {
   Gold,
 }
 
+export const ALL_GEMS = (Object.keys(Gem)
+  .filter(key => isNaN(Number(key))) as (keyof typeof Gem)[])
+  .map(key => Gem[key]);
+
 export type NonGoldGem = Exclude<Gem, Gem.Gold>;
 
 export type Bank = { [gem in Gem]: number }
+
+export const EMPTY_BANK: Bank = {
+  [Gem.Diamond]: 0,
+  [Gem.Onyx]: 0,
+  [Gem.Emerald]: 0,
+  [Gem.Ruby]: 0,
+  [Gem.Sapphire]: 0,
+  [Gem.Gold]: 0,
+}
 
 export type Level = 1 | 2 | 3;
 

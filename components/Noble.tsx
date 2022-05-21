@@ -7,7 +7,7 @@ const cardColors: CardColor[] = ["green", "white", "blue", "black", "red"];
 
 type Props = {
   noble: NobleType;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 const Noble = ({ noble, onClick }: Props) => (
