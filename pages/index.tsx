@@ -22,8 +22,8 @@ const allGems = (Object.keys(Gem)
 const Home: NextPage = () => {
   const [game, dispatch] = useGame();
 
-  const init = async () => {
-    dispatch({ type: "NEW_GAME", players: 3, dispatch });
+  const newGame = async ({ players }: { players: 2 | 3 | 4 }) => {
+    dispatch({ type: "NEW_GAME", players, dispatch });
   };
 
   const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
@@ -43,7 +43,7 @@ const Home: NextPage = () => {
   }
 
   useEffect(() => {
-    init();
+    newGame({ players: 3 });
   }, [])
 
   return (
@@ -55,7 +55,17 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <button className={styles.shuffle} onClick={() => init()}>Shuffle</button>
+        <div className={styles.shuffle}>
+          <button onClick={() => newGame({ players: 2 })}>
+            New 2 Player Game
+          </button>
+          <button onClick={() => newGame({ players: 3 })}>
+            New 3 Player Game
+          </button>
+          <button onClick={() => newGame({ players: 4 })}>
+            New 4 Player Game
+          </button>
+        </div>
 
         <div className={styles.nobles}>
           {game.nobles !== "Loading" ? (

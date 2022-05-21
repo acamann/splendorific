@@ -14,8 +14,11 @@
 
 .shuffle {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .nobles {
