@@ -47,98 +47,104 @@ const Home: NextPage = () => {
   }, [])
 
   return (
-    <div className={styles.container}>
+    <>
       <Head>
         <title>Splendorific</title>
         <meta name="description" content="Splendor clone" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      <div className={styles.shuffle}>
+        <button onClick={() => newGame({ players: 2 })}>
+          New 2 Player Game
+        </button>
+        <button onClick={() => newGame({ players: 3 })}>
+          New 3 Player Game
+        </button>
+        <button onClick={() => newGame({ players: 4 })}>
+          New 4 Player Game
+        </button>
+      </div>
+
       <main className={styles.main}>
-        <div className={styles.shuffle}>
-          <button onClick={() => newGame({ players: 2 })}>
-            New 2 Player Game
-          </button>
-          <button onClick={() => newGame({ players: 3 })}>
-            New 3 Player Game
-          </button>
-          <button onClick={() => newGame({ players: 4 })}>
-            New 4 Player Game
-          </button>
-        </div>
-
-        <div className={styles.nobles}>
-          {game.nobles !== "Loading" ? (
-            game.nobles.map((noble, i) => (
-              <Noble key={i}
-                noble={noble}
-                onClick={() => takeNoble(noble, i)}
-              />
-            ))
-          ) : undefined}
-        </div>
-
         <div className={styles.board}>
-          {game.decks !== "Loading" ? (
-            [3, 2, 1] as Level[]).map(level => (
-              <>
-                {game.decks[level].length > 4 ? <Stack level={level} /> : <CardPlaceholder />}
-                {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
+          <div className={styles.nobles}>
+            {game.nobles !== "Loading" ? (
+              game.nobles.map((noble, i) => (
+                <Noble key={i}
+                  noble={noble}
+                  onClick={() => takeNoble(noble, i)}
+                />
+              ))
+            ) : undefined}
+          </div>
+
+          <div className={styles.cards}>
+            {game.decks !== "Loading" ? (
+              [3, 2, 1] as Level[]).map(level => (
+                <>
+                  {game.decks[level].length > 4 ? <Stack level={level} /> : <CardPlaceholder />}
+                  {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
+                    <Card key={i}
+                      card={card}
+                      onClick={() => takeCard(level, i, card)}
+                    />
+                  ))}
+                  {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
+                    <CardPlaceholder key={i} />
+                  ) : undefined}
+                </>
+              )
+            ) : undefined}
+          </div>
+
+          <div className={styles.bank}>
+            {allGems.map(gem => game.bank[gem] > 0 ? (
+              <Chip
+                key={gem}
+                gem={gem}
+                count={game.bank[gem]}
+                onClick={() => takeGem(gem)}
+              />
+            ) : undefined)}
+          </div>
+        </div>
+
+        <div className={styles.players}>
+          {game.players.map((player, index) => (
+            <div key={index}
+              className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : undefined}`}
+            >
+              <div className={styles.name}>Player {index + 1}</div>
+              <div className={styles.bank}>
+                {allGems.map(gem => player.bank[gem] > 0 ? (
+                  <Chip
+                    key={gem}
+                    gem={gem}
+                    count={player.bank[gem]}
+                    onClick={() => returnGem(gem)}
+                  />
+                ) : undefined)}
+              </div>
+              <div className={styles.cards}>
+                {player.cards.map((card, i) => (
                   <Card key={i}
                     card={card}
-                    onClick={() => takeCard(level, i, card)}
+                    onClick={() => undefined}
                   />
                 ))}
-                {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
-                  <CardPlaceholder key={i} />
-                ) : undefined}
-              </>
-            )
-          ) : undefined}
-        </div>
-
-        <div className={styles.bank}>
-          {allGems.map(gem => game.bank[gem] > 0 ? (
-            <Chip
-              key={gem}
-              gem={gem}
-              count={game.bank[gem]}
-              onClick={() => takeGem(gem)}
-            />
-          ) : undefined)}
-        </div>
-
-        {game.players.map((player, index) => (
-          <div className={styles.player} key={index}>
-            <div className={styles.name}>Player {index + 1}</div>
-            <div className={styles.bank}>
-              {allGems.map(gem => player.bank[gem] > 0 ? (
-                <Chip
-                  key={gem}
-                  gem={gem}
-                  count={player.bank[gem]}
-                  onClick={() => returnGem(gem)}
-                />
-              ) : undefined)}
-            </div>
-            <div className={styles.cards}>
-              {player.cards.map((card, i) => (
-                <Card key={i}
-                  card={card}
+              </div>
+              {player.nobles.map((noble, i) => (
+                <Noble key={i}
+                  noble={noble}
                   onClick={() => undefined}
                 />
               ))}
             </div>
-            {player.nobles.map((noble, i) => (
-              <Noble key={i}
-                noble={noble}
-                onClick={() => undefined}
-              />
-            ))}
-          </div>
-        ))}
+          ))}
+        </div>
       </main>
-    </div>
+    </>
   )
 }
 
