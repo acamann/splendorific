@@ -11,7 +11,7 @@ Next.js, Typescript, Sass
  - basic gameplay, store in-game state
  - simple AI, play against computer with goals
  - simulation and AI tuning
- - multiplayer (roomservice, socket.io)
+ - multiplayer (socket.io)
 
 ![image](https://user-images.githubusercontent.com/57601245/167269950-9dd90ecb-7af9-4873-98cd-db4d0758c4d3.png)
 
@@ -21,3 +21,5 @@ Next.js, Typescript, Sass
  - Next.js API https://dev.to/codymjarrett/understanding-how-api-routes-work-in-next-js-50fm
  - CSS box-shadows https://getcssscan.com/css-box-shadow-examples
  - Card images https://picsum.photos/
+ - socket.io
+   - https://www.section.io/engineering-education/rock-paper-scissor-online/
