@@ -27,15 +27,19 @@ const Home: NextPage = () => {
   };
 
   const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
-    dispatch({ type: "PURCHASE_CARD", card, level, index })
+    // TODO: more game logic in here for draft turns, not dispatched to game until valid & committed
+    dispatch({ type: "PURCHASE_CARD", card, level, index });
+    dispatch({ type: "NEXT_PLAYER" });
   }
 
   const takeNoble = (noble: NobleType, index: number) => {
     dispatch({ type: "TAKE_NOBLE", noble, index });
+    dispatch({ type: "NEXT_PLAYER" });
   }
 
   const takeGem = (gem: Gem) => {
     dispatch({ type: "TAKE_GEM", gem });
+    dispatch({ type: "NEXT_PLAYER" });
   }
 
   const returnGem = (gem: Gem) => {

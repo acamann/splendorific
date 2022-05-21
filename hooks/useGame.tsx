@@ -1,6 +1,7 @@
 import { Dispatch, useReducer } from "react";
 import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
 
+// TODO: add error to state, used to notify of invalid step, etc
 type GameState = {
   bank: Bank;
   decks: "Loading" | Decks;
@@ -45,8 +46,11 @@ type GameAction = {
   type: "NEW_GAME",
   players: 2 | 3 | 4,
   dispatch: Dispatch<Action>;
+} | {
+  type: "NEXT_PLAYER"
 }
 
+// TODO: refactor these so that it is a full valid action (rather than take/return single gem)
 type BankAction = {
   type: "TAKE_GEM" | "RETURN_GEM",
   gem: Gem,
@@ -221,6 +225,12 @@ const reducer = (state: GameState, action: Action): GameState => {
       return {
         ...state,
         nobles: [...state.nobles.slice(0, index), ...state.nobles.slice(index + 1)]
+      }
+    }
+    case 'NEXT_PLAYER': {
+      return {
+        ...state,
+        currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }
     default:
