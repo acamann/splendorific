@@ -1,6 +1,6 @@
 import { Dispatch, useReducer } from "react";
-import { Bank, Card, Decks, EMPTY_BANK, Gem, Noble, Player } from "../models";
-import { getBankValueOfCards, isValidGemAction } from "../utils/validation";
+import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
+import { getBankValueOfCards, getEmptyBank, isValidGemAction } from "../utils/validation";
 
 type GameState = {
   bank: Bank;
@@ -12,7 +12,7 @@ type GameState = {
 }
 
 const initialState: GameState = {
-  bank: EMPTY_BANK,
+  bank: getEmptyBank(),
   decks: {
     [1]: [],
     [2]: [],
@@ -25,7 +25,7 @@ const initialState: GameState = {
 }
 
 const initialPlayerState: Player = {
-  bank: EMPTY_BANK,
+  bank: getEmptyBank(),
   cards: [],
   nobles: [],
   points: 0
@@ -176,21 +176,17 @@ const reducer = (state: GameState, action: Action): GameState => {
         }
       };
 
-      let newDecks = { ...state.decks };
+      let newDeck: Card[] = [];
       if (source === "reserved") {
         // do stuff to purchase reserved card (different action)
       } else {
-        const newDeck = [...state.decks[source.deck]];
+        newDeck = [...state.decks[source.deck]];
         if (state.decks[source.deck].length > 4) {
           const replacement = state.decks[source.deck][4];
           newDeck.splice(index, 1, replacement);
           newDeck.splice(4, 1);
         } else {
           newDeck.splice(index, 1);
-        }
-        newDecks = {
-          ...state.decks,
-          [source.deck]: newDeck
         }
       }
 
@@ -205,7 +201,12 @@ const reducer = (state: GameState, action: Action): GameState => {
 
       return {
         ...state,
-        decks: newDecks,
+        decks: source === "reserved" ? {
+          ...state.decks,
+        } : {
+          ...state.decks,
+          [source.deck]: newDeck
+        },
         players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
           ...player,
           cards: [...player.cards, card],

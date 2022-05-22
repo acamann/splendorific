@@ -1,4 +1,13 @@
-import { ALL_GEMS, Bank, Card, EMPTY_BANK, Gem, Player } from "../models";
+import { ALL_GEMS, Bank, Card, Gem, Player } from "../models";
+
+export const getEmptyBank = () => ({
+  [Gem.Diamond]: 0,
+  [Gem.Onyx]: 0,
+  [Gem.Emerald]: 0,
+  [Gem.Ruby]: 0,
+  [Gem.Sapphire]: 0,
+  [Gem.Gold]: 0,
+});
 
 export const isValidGemAction = (gems: Gem[], bank: Bank) => {
   if (gems.includes(Gem.Gold)) return false;
@@ -17,7 +26,7 @@ export const isValidGemAction = (gems: Gem[], bank: Bank) => {
 }
 
 export const getBankValueOfCards = (cards: Card[]): Bank => {
-  const bank = EMPTY_BANK;
+  const bank = getEmptyBank();
   for (const gem of cards.map(card => card.gem)) {
     bank[gem]++;
   }
@@ -25,7 +34,7 @@ export const getBankValueOfCards = (cards: Card[]): Bank => {
 }
 
 const getPurchasingPower = (player: Player) => {
-  const bank = EMPTY_BANK;
+  const bank = getEmptyBank();
   const cardValues = getBankValueOfCards(player.cards);
   for (const gem of ALL_GEMS) {
     bank[gem] = player.bank[gem] + cardValues[gem]
@@ -34,7 +43,7 @@ const getPurchasingPower = (player: Player) => {
 }
 
 const doesBankHaveGems = (gems: Gem[], bank: Bank, canUseGold: boolean) => {
-  const bankCopy = { ...bank };
+  const bankCopy = Object.assign({}, bank);
   for (const gem of gems) {
     if (bankCopy[gem] > 0) {
       bankCopy[gem]--;
