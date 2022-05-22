@@ -20,11 +20,11 @@ const Noble = ({ noble, onClick }: Props) => (
           {noble.points}
         </div>
         <ul className={styles.cost}>
-          {cardColors.map((cardColor: CardColor) => noble[cardColor] > 0 ? (
+          {cardColors.filter(color => noble[color] > 0).map((cardColor: CardColor) => (
             <li key={cardColor} className={styles[cardColor]}>
               {noble[cardColor]}
             </li>
-          ) : undefined )}
+          ))}
         </ul>
       </div>
     </div>

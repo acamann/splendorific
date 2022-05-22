@@ -48,11 +48,26 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  margin-right: 10px;
 
   .player {
     background-color:rgba(255, 255, 255, 0.5);;
     border-radius: 18px;
     padding: 9px;
+
+    .name {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .draftGems {
+      display: flex;
+      gap: 5px;
+      padding: 10px;
+      border-radius: 10px;
+      border: solid 1px goldenrod;
+      align-items: center;
+    }
 
     &.current {
       background-color: lightyellow;

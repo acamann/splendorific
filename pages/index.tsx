@@ -14,7 +14,8 @@ import {
   Level
 } from '../models'
 import styles from '../styles/Home.module.scss'
-import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation'
+import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Home: NextPage = () => {
   const [game, dispatch] = useGame();
@@ -27,12 +28,16 @@ const Home: NextPage = () => {
   const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       dispatch({ type: "PURCHASE_CARD", card, source: { deck: level }, index });
+    } else {
+      toast.error("Can't afford");
     }
   }
 
   const considerGem = (gem: Gem) => {
     if (areValidGemsToConsider([...consideredGems, gem], game.bank)) {
       setConsideredGems(previous => [...previous, gem]);
+    } else {
+      toast.error("Invalid gem");
     }
   }
 
@@ -40,6 +45,8 @@ const Home: NextPage = () => {
     if (isValidGemAction(consideredGems, game.bank)) {
       dispatch({ type: "TAKE_GEMS", gems: consideredGems });
       setConsideredGems([]);
+    } else {
+      toast.error("Invalid gems")
     }
   }
 
@@ -51,7 +58,13 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     newGame({ players: 3 });
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    if (game.error) {
+      toast.error(game.error);
+    }
+  }, [game.error])
 
   return (
     <>
@@ -60,6 +73,7 @@ const Home: NextPage = () => {
         <meta name="description" content="Splendor clone" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Toaster />
 
       <div className={styles.shuffle}>
         <button onClick={() => newGame({ players: 2 })}>
@@ -119,14 +133,14 @@ const Home: NextPage = () => {
             <div key={index}
               className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : undefined}`}
             >
-              <div className={styles.name}>Player {index + 1}</div>
+              <div className={styles.name}>Player {index + 1} ({player.points} points)</div>
               {index === game.currentPlayerIndex && consideredGems.length > 0 ? (
                 <div className={styles.draftGems}>
                   {consideredGems.map((gem, index) => (
                     <Chip key={index} gem={gem} onClick={() => returnConsideredGem(index)} />
                   ))}
-                  <button onClick={() => takeConsideredGems()}>
-                    Confirm
+                  <button onClick={() => takeConsideredGems()} disabled={!isValidGemAction(consideredGems, game.bank)}>
+                    &#10003;
                   </button>
                 </div>
               ) : undefined}

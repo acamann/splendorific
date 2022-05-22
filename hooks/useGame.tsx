@@ -8,7 +8,7 @@ type GameState = {
   nobles: "Loading" | Noble[];
   players: Player[];
   currentPlayerIndex: number;
-  message: string;
+  error: string;
 }
 
 const initialState: GameState = {
@@ -21,13 +21,14 @@ const initialState: GameState = {
   nobles: [],
   players: [],
   currentPlayerIndex: 0,
-  message: ""
+  error: ""
 }
 
 const initialPlayerState: Player = {
   bank: EMPTY_BANK,
   cards: [],
-  nobles: []
+  nobles: [],
+  points: 0
 }
 
 type GameAction = {
@@ -127,7 +128,7 @@ const reducer = (state: GameState, action: Action): GameState => {
       if (!isValidGemAction(action.gems, state.bank)) {
         return {
           ...state,
-          message: "Invalid action"
+          error: "Invalid action"
         }
       }
 
@@ -170,7 +171,7 @@ const reducer = (state: GameState, action: Action): GameState => {
         } else {
           return {
             ...state,
-            message: "Cannot afford"
+            error: "Cannot afford"
           }
         }
       };
@@ -193,13 +194,14 @@ const reducer = (state: GameState, action: Action): GameState => {
         }
       }
 
-      // does this card qualify you for a noble?? if so, let's give it!
-      // return {
-      //   ...state,
-      //   nobles: [...state.nobles.slice(0, index), ...state.nobles.slice(index + 1)]
-      // }
+      let newPoints = card.points;
 
-      // let's update your player points at this moment as a result of any cards + nobles
+      if (state.nobles !== "Loading") {
+        //const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
+        for (const noble of state.nobles) {
+          // if qualified for this noble, take the points & remove the noble
+        }
+      }
 
       return {
         ...state,
@@ -207,15 +209,18 @@ const reducer = (state: GameState, action: Action): GameState => {
         players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
           ...player,
           cards: [...player.cards, card],
-          bank: playerBank
+          bank: playerBank,
+          points: player.points + newPoints
         }) : player),
         bank: bank,
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }
     default:
-      console.log(action);
-      throw new Error();
+      return {
+        ...state,
+        error: `Unknown action: ${JSON.stringify(action)}`
+      }
   }
 }
 

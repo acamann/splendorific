@@ -51,4 +51,5 @@ export type Player = {
   bank: Bank;
   cards: Card[];
   nobles: Noble[];
+  points: number;
 }
