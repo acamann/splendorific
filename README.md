@@ -18,6 +18,7 @@ Next.js, Typescript, Sass
 ## References
 
  - Splendor https://boardgamegeek.com/boardgame/148228/splendor
+ - Splendor rules https://www.ultraboardgames.com/splendor/game-rules.php
  - Next.js API https://dev.to/codymjarrett/understanding-how-api-routes-work-in-next-js-50fm
  - CSS box-shadows https://getcssscan.com/css-box-shadow-examples
  - Card images https://picsum.photos/
