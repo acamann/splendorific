@@ -137,7 +137,12 @@ const Home: NextPage = () => {
               {index === game.currentPlayerIndex && consideredGems.length > 0 ? (
                 <div className={styles.draftGems}>
                   {consideredGems.map((gem, index) => (
-                    <Chip key={index} gem={gem} onClick={() => returnConsideredGem(index)} />
+                    <Chip
+                      key={index}
+                      gem={gem}
+                      size={40}
+                      onClick={() => returnConsideredGem(index)}
+                    />
                   ))}
                   <button onClick={() => takeConsideredGems()} disabled={!isValidGemAction(consideredGems, game.bank)}>
                     &#10003;
@@ -149,6 +154,7 @@ const Home: NextPage = () => {
                   <Chip
                     key={gem}
                     gem={gem}
+                    size={60}
                     count={player.bank[gem]}
                   />
                 ) : undefined)}

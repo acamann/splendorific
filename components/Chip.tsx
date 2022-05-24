@@ -6,6 +6,7 @@ type Props = {
   gem: Gem;
   count?: number;
   onClick?: (gem: Gem) => void;
+  size?: number;
 }
 
 const getClassNameFromGem = (gem: Gem): string => {
@@ -19,9 +20,19 @@ const getClassNameFromGem = (gem: Gem): string => {
   }
 }
 
-const Chip = ({ gem, count, onClick }: Props) => (
-  <div className={`${styles.chip} ${getClassNameFromGem(gem)}`} onClick={() => onClick?.(gem)}>
-    <div className={styles.gem}>{count}</div>
+const Chip = ({ gem, count, onClick, size }: Props) => (
+  <div
+    className={`${styles.border}  ${getClassNameFromGem(gem)}`}
+    style={{ width: size ?? 80, height: size ?? 80 }}
+  >
+    <div
+      className={`${styles.chip} ${onClick ? styles.clickable : undefined}`}
+      onClick={() => onClick?.(gem)}
+    >
+      <div className={styles.gem}>
+        {count}
+      </div>
+    </div>
   </div>
 );
 

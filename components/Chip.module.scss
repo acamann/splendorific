@@ -1,18 +1,56 @@
 @import "../styles/variables.scss";
 
-.chip {
-  width: 80px;
-  height: 80px;
-  border-radius: 80px;
-  border: solid 6px;
+
+.border {
+  border-radius: 100%;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px,
             rgba(0, 0, 0, 0.3) 0px 7px 13px -3px;
+
+  &.gold {
+    background-color: $gold;
+  }
+  &.onyx {
+    background-color: $onyx;
+    .gem { background-position: 0 0; }
+  }
+  &.sapphire {
+    background-color: $sapphire;
+    .gem { background-position: 25% 0; }
+  }
+  &.diamond {
+    background-color: $diamond;
+    .gem { background-position: 50% 0; }
+  }
+  &.emerald {
+    background-color: $emerald;
+    .gem { background-position: 75% 0; }
+  }
+  &.ruby {
+    background-color: $ruby;
+    .gem { background-position: 100% 0; }
+  }
+}
+
+.chip {
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  padding: 6%;
+  background-clip: content-box;
   background-color: lightgoldenrodyellow;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: default;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Old versions of Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+          user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome, Edge, Opera and Firefox */
 
-  &:hover {
+  &.clickable {
     cursor: pointer;
   }
 
@@ -32,29 +70,5 @@
     -webkit-text-fill-color: white; /* Will override color (regardless of order) */
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
-  }
-
-  &.gold {
-    border-color: $gold;
-  }
-  &.onyx {
-    border-color: $onyx;
-    .gem { background-position: 0 0; }
-  }
-  &.sapphire {
-    border-color: $sapphire;
-    .gem { background-position: 25% 0; }
-  }
-  &.diamond {
-    border-color: $diamond;
-    .gem { background-position: 50% 0; }
-  }
-  &.emerald {
-    border-color: $emerald;
-    .gem { background-position: 75% 0; }
-  }
-  &.ruby {
-    border-color: $ruby;
-    .gem { background-position: 100% 0; }
   }
 }
