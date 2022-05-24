@@ -25,12 +25,24 @@ const Home: NextPage = () => {
     dispatch({ type: "NEW_GAME", players, dispatch });
   };
 
-  const takeCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+  const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       dispatch({ type: "PURCHASE_CARD", card, source: { deck: level }, index });
     } else {
       toast.error("Can't afford");
     }
+  }
+
+  const purchaseReserved = (index: number, card: CardType): void => {
+    if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
+      dispatch({ type: "PURCHASE_CARD", card, source: "reserved", index });
+    } else {
+      toast.error("Can't afford");
+    }
+  }
+
+  const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+    dispatch({ type: "RESERVE_CARD", card, level, index });
   }
 
   const considerGem = (gem: Gem) => {
@@ -105,7 +117,8 @@ const Home: NextPage = () => {
                   {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
                     <Card key={i}
                       card={card}
-                      onClick={() => takeCard(level, i, card)}
+                      onPurchase={() => purchaseCard(level, i, card)}
+                      onReserve={() => reserveCard(level, i, card)}
                     />
                   ))}
                   {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
@@ -161,9 +174,15 @@ const Home: NextPage = () => {
               </div>
               <div className={styles.cards}>
                 {player.cards.map((card, i) => (
-                  <Card key={i}
+                  <Card key={i} card={card} />
+                ))}
+              </div>
+              <div className={styles.reserved}>
+                {player.reserved.map((card, i) => (
+                  <Card
+                    key={i}
                     card={card}
-                    onClick={() => undefined}
+                    onPurchase={() => purchaseReserved(card, i)}
                   />
                 ))}
               </div>

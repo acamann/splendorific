@@ -27,6 +27,7 @@ const initialState: GameState = {
 const initialPlayerState: Player = {
   bank: getEmptyBank(),
   cards: [],
+  reserved: [],
   nobles: [],
   points: 0
 }
@@ -176,6 +177,8 @@ const reducer = (state: GameState, action: Action): GameState => {
         }
       };
 
+      // make sure card is what they say it is
+
       let newDeck: Card[] = [];
       if (source === "reserved") {
         // do stuff to purchase reserved card (different action)
@@ -214,6 +217,47 @@ const reducer = (state: GameState, action: Action): GameState => {
           points: player.points + newPoints
         }) : player),
         bank: bank,
+        currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
+      }
+    }
+    case 'RESERVE_CARD': {
+      if (state.decks === "Loading") {
+        return { ...state }
+      }
+
+      const { level, card, index } = action;
+
+      // make sure card is what they say it is
+
+      const newDeck = [...state.decks[level]];
+      if (state.decks[level].length > 4) {
+        const replacement = state.decks[level][4];
+        newDeck.splice(index, 1, replacement);
+        newDeck.splice(4, 1);
+      } else {
+        newDeck.splice(index, 1);
+      }
+
+      const isGoldAvailable = state.bank[Gem.Gold] > 0
+
+      return {
+        ...state,
+        decks: {
+          ...state.decks,
+          [level]: newDeck
+        },
+        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
+          ...player,
+          reserved: [...player.reserved, card],
+          bank: {
+            ...player.bank,
+            [Gem.Gold]: isGoldAvailable ? player.bank[Gem.Gold] + 1 : player.bank[Gem.Gold]
+          }
+        }) : player),
+        bank: {
+          ...state.bank,
+          [Gem.Gold]: isGoldAvailable ? state.bank[Gem.Gold] - 1 : state.bank[Gem.Gold]
+        },
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }

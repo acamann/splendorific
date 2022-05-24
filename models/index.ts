@@ -41,6 +41,7 @@ export type Noble = {
 export type Player = {
   bank: Bank;
   cards: Card[];
+  reserved: Card[];
   nobles: Noble[];
   points: number;
 }

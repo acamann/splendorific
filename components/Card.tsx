@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card as CardType, Gem, NonGoldGem } from "../models";
 import styles from "./Card.module.scss";
 
 type Props = {
   card: CardType;
-  onClick: () => void;
+  onPurchase?: () => void;
+  onReserve?: () => void;
 }
 
 const getClassNameFromGem = (gem: Gem): string => {
@@ -18,29 +19,45 @@ const getClassNameFromGem = (gem: Gem): string => {
   }
 }
 
-const Card = ({ card, onClick }: Props) => (
-  <div className={`${styles.card} ${getClassNameFromGem(card.gem)}`} onClick={onClick}>
-    <div className={styles.background} data-image-id={card.imageId}>
-    </div>
-    <div className={styles.content}>
-      <div className={styles.top}>
-        <div className={styles.points}>
-          {card.points > 0 ? card.points : undefined}
-        </div>
-        <div className={styles.gem}></div>
+const Card = ({ card, onPurchase, onReserve }: Props) => {
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+  const isClickable = onPurchase || onReserve;
+
+  return (
+    <div
+      className={`${styles.card} ${getClassNameFromGem(card.gem)} ${isHovered && styles.hovered}`}
+      onMouseEnter={(): void => isClickable && setIsHovered(true)}
+      onMouseLeave={(): void => isClickable && setIsHovered(false)}
+    >
+      <div className={styles.background} data-image-id={card.imageId}>
       </div>
-      <ul className={styles.cost}>
-        {Object.entries(Gem)
-          .filter(([key, gem]) => card.cost.includes(gem as NonGoldGem))
-          .map(([key, gem]) => (
-            <li key={key} className={getClassNameFromGem(gem as NonGoldGem)}>
-              {card.cost.filter(c => c === gem as NonGoldGem).length}
-            </li>
-          ))
-        }
-      </ul>
+      <div className={styles.content}>
+        <div className={styles.top}>
+          <div className={styles.points}>
+            {card.points > 0 ? card.points : undefined}
+          </div>
+          <div className={styles.gem}></div>
+        </div>
+        <ul className={styles.cost}>
+          {Object.entries(Gem)
+            .filter(([key, gem]) => card.cost.includes(gem as NonGoldGem))
+            .map(([key, gem]) => (
+              <li key={key} className={getClassNameFromGem(gem as NonGoldGem)}>
+                {card.cost.filter(c => c === gem as NonGoldGem).length}
+              </li>
+            ))
+          }
+        </ul>
+        {isHovered ? (
+          <div className={styles.actions}>
+            {onPurchase ? <button onClick={onPurchase}>Purchase</button> : undefined}
+            {onReserve ? <button onClick={onReserve}>Reserve</button> : undefined}
+          </div>
+        ) : undefined}
+      </div>
     </div>
-  </div>
-);
+  );
+}
 
 export default Card;
