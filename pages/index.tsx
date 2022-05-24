@@ -182,7 +182,7 @@ const Home: NextPage = () => {
                   <Card
                     key={i}
                     card={card}
-                    onPurchase={() => purchaseReserved(card, i)}
+                    onPurchase={() => purchaseReserved(i, card)}
                   />
                 ))}
               </div>
