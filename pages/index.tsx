@@ -117,7 +117,7 @@ const Home: NextPage = () => {
                   {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
                     <Card key={i}
                       card={card}
-                      onPurchase={() => purchaseCard(level, i, card)}
+                      onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(level, i, card) : undefined}
                       onReserve={() => reserveCard(level, i, card)}
                     />
                   ))}
