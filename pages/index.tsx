@@ -174,7 +174,12 @@ const Home: NextPage = () => {
               </div>
               <div className={styles.cards}>
                 {player.cards.map((card, i) => (
-                  <Card key={i} card={card} />
+                  <Card
+                    key={i}
+                    card={card}
+                    width={80}
+                    hideCost
+                  />
                 ))}
               </div>
               <div className={styles.reserved}>
@@ -183,6 +188,7 @@ const Home: NextPage = () => {
                     key={i}
                     card={card}
                     onPurchase={() => purchaseReserved(i, card)}
+                    width={80}
                   />
                 ))}
               </div>

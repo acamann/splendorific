@@ -3,12 +3,14 @@ import styles from "./Card.module.scss";
 
 type Props = {
   level: 1 | 2 | 3;
+  width?: number;
 }
 
 const Stack = ({
-  level
+  level,
+  width = 125
 }: Props) => (
-  <div className={styles.stack} data-level={level}>
+  <div className={styles.stack} data-level={level} style={{ width, height: 7 * width / 5 }}>
     <div className={styles.title}>
       Splendorific
     </div>

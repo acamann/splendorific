@@ -6,6 +6,8 @@ type Props = {
   card: CardType;
   onPurchase?: () => void;
   onReserve?: () => void;
+  width?: number;
+  hideCost?: boolean;
 }
 
 const getClassNameFromGem = (gem: Gem): string => {
@@ -19,7 +21,7 @@ const getClassNameFromGem = (gem: Gem): string => {
   }
 }
 
-const Card = ({ card, onPurchase, onReserve }: Props) => {
+const Card = ({ card, onPurchase, onReserve, width = 125, hideCost = false }: Props) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const isClickable = onPurchase || onReserve;
@@ -29,26 +31,33 @@ const Card = ({ card, onPurchase, onReserve }: Props) => {
       className={`${styles.card} ${getClassNameFromGem(card.gem)} ${isHovered && styles.hovered}`}
       onMouseEnter={(): void => isClickable && setIsHovered(true)}
       onMouseLeave={(): void => isClickable && setIsHovered(false)}
+      style={{ width, height: 7 * width / 5 }}
     >
       <div className={styles.background} data-image-id={card.imageId}>
       </div>
       <div className={styles.content}>
         <div className={styles.top}>
-          <div className={styles.points}>
+          <div className={styles.points} style={{ fontSize: width / 4 }}>
             {card.points > 0 ? card.points : undefined}
           </div>
           <div className={styles.gem}></div>
         </div>
-        <ul className={styles.cost}>
-          {Object.entries(Gem)
-            .filter(([key, gem]) => card.cost.includes(gem as NonGoldGem))
-            .map(([key, gem]) => (
-              <li key={key} className={getClassNameFromGem(gem as NonGoldGem)}>
-                {card.cost.filter(c => c === gem as NonGoldGem).length}
-              </li>
-            ))
-          }
-        </ul>
+        {!hideCost ? (
+          <ul className={styles.cost}>
+            {Object.entries(Gem)
+              .filter(([key, gem]) => card.cost.includes(gem as NonGoldGem))
+              .map(([key, gem]) => (
+                <li
+                  key={key}
+                  className={getClassNameFromGem(gem as NonGoldGem)}
+                  style={{ width: width / 5, height: width / 5, fontSize: width  * 0.18 }}
+                >
+                  {card.cost.filter(c => c === gem as NonGoldGem).length}
+                </li>
+              ))
+            }
+          </ul>
+        ) : undefined}
         {isHovered ? (
           <div className={styles.actions}>
             {onPurchase ? <button onClick={onPurchase}>Purchase</button> : undefined}
