@@ -1,4 +1,4 @@
-import { ALL_GEMS, Bank, Card, Gem, Player } from "../models";
+import { ALL_GEMS, Bank, Card, Gem, Noble, Player } from "../models";
 
 export const getEmptyBank = () => ({
   [Gem.Diamond]: 0,
@@ -31,6 +31,15 @@ export const getBankValueOfCards = (cards: Card[]): Bank => {
     bank[gem]++;
   }
   return bank;
+}
+
+export const isPlayerEligibleForNoble = (playerCardValues: Bank, noble: Noble): boolean => {
+  if (playerCardValues[Gem.Onyx] < noble.black) return false;
+  if (playerCardValues[Gem.Diamond] < noble.white) return false;
+  if (playerCardValues[Gem.Emerald] < noble.green) return false;
+  if (playerCardValues[Gem.Sapphire] < noble.blue) return false;
+  if (playerCardValues[Gem.Ruby] < noble.red) return false;
+  return true;
 }
 
 const getPurchasingPower = (player: Player) => {

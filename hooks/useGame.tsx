@@ -1,6 +1,6 @@
 import { Dispatch, useReducer } from "react";
 import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
-import { getBankValueOfCards, getEmptyBank, isValidGemAction } from "../utils/validation";
+import { getBankValueOfCards, getEmptyBank, isPlayerEligibleForNoble, isValidGemAction } from "../utils/validation";
 
 type GameState = {
   bank: Bank;
@@ -169,7 +169,7 @@ const reducer = (state: GameState, action: Action): GameState => {
       const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
       for (const gem of card.cost) {
         if (playerCardValues[gem] > 0) {
-          playerCardValues[gem]--; //
+          playerCardValues[gem]--;
         } else if (playerBank[gem] > 0) {
           playerBank[gem]--;
           bank[gem]++;
@@ -203,10 +203,16 @@ const reducer = (state: GameState, action: Action): GameState => {
       let playerPoints = state.players[state.currentPlayerIndex].points;
       playerPoints = playerPoints + card.points;
 
+      // figure out how to store in state sanely
+      const earnedNobles: Noble[] = []
       if (state.nobles !== "Loading") {
-        //const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
+        const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
         for (const noble of state.nobles) {
-          // if qualified for this noble, take the points & remove the noble
+          if (isPlayerEligibleForNoble(playerCardValues, noble)) {
+            // if qualified for this noble, take the points & remove the noble
+            playerPoints = playerPoints + noble.points;
+            earnedNobles.push(noble);
+          }
         }
       }
 
