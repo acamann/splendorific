@@ -39,6 +39,7 @@ export type Noble = {
 }
 
 export type Player = {
+  name?: string;
   bank: Bank;
   cards: Card[];
   reserved: Card[];

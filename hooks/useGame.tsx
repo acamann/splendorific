@@ -8,6 +8,7 @@ type GameState = {
   nobles: "Loading" | Noble[];
   players: Player[];
   currentPlayerIndex: number;
+  winningPlayerIndex?: number;
   error: string;
 }
 
@@ -21,6 +22,7 @@ const initialState: GameState = {
   nobles: [],
   players: [],
   currentPlayerIndex: 0,
+  winningPlayerIndex: undefined,
   error: ""
 }
 
@@ -108,7 +110,12 @@ const reducer = (state: GameState, action: Action): GameState => {
         ...state,
         decks: "Loading",
         nobles: "Loading",
-        players: Array(action.players).fill(initialPlayerState),
+        players: Array(action.players)
+          .fill(initialPlayerState)
+          .map((player, i) => ({
+            ...player,
+            name: `Player ${i + 1}`
+          })),
         bank,
         currentPlayerIndex: 0
       }
@@ -193,7 +200,8 @@ const reducer = (state: GameState, action: Action): GameState => {
         }
       }
 
-      let newPoints = card.points;
+      let playerPoints = state.players[state.currentPlayerIndex].points;
+      playerPoints = playerPoints + card.points;
 
       if (state.nobles !== "Loading") {
         //const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
@@ -215,9 +223,10 @@ const reducer = (state: GameState, action: Action): GameState => {
           cards: [...player.cards, card],
           reserved: source === "reserved" ? player.reserved.filter((r, i) => i !== index) : player.reserved,
           bank: playerBank,
-          points: player.points + newPoints
+          points: playerPoints
         }) : player),
         bank: bank,
+        winningPlayerIndex: playerPoints >= 15 ? state.currentPlayerIndex : undefined,
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }

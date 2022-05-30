@@ -16,13 +16,16 @@ import {
 import styles from '../styles/Home.module.scss'
 import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
+import Modal from '../components/Modal'
 
 const Home: NextPage = () => {
+  const [showMenu, setShowMenu] = useState<boolean>(true);
   const [game, dispatch] = useGame();
   const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
 
   const newGame = async ({ players }: { players: 2 | 3 | 4 }) => {
     dispatch({ type: "NEW_GAME", players, dispatch });
+    setShowMenu(false);
   };
 
   const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
@@ -42,7 +45,11 @@ const Home: NextPage = () => {
   }
 
   const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
-    dispatch({ type: "RESERVE_CARD", card, level, index });
+    if (game.players[game.currentPlayerIndex].reserved.length < 3) {
+      dispatch({ type: "RESERVE_CARD", card, level, index });
+    } else {
+      toast.error("Can only reserve 3 cards");
+    }
   }
 
   const considerGem = (gem: Gem) => {
@@ -69,14 +76,16 @@ const Home: NextPage = () => {
   }
 
   useEffect(() => {
-    newGame({ players: 3 });
-  }, []);
-
-  useEffect(() => {
     if (game.error) {
       toast.error(game.error);
     }
-  }, [game.error])
+  }, [game.error]);
+
+  useEffect(() => {
+    if (game.winningPlayerIndex !== undefined) {
+      toast.success(`WINNER! Congratulations ${game.players[game.winningPlayerIndex].name}`)
+    }
+  }, [game.winningPlayerIndex, game.players]);
 
   return (
     <>
@@ -87,7 +96,9 @@ const Home: NextPage = () => {
       </Head>
       <Toaster />
 
-      <div className={styles.shuffle}>
+      <Modal isShowing={showMenu} hide={() => setShowMenu(false)}>
+        <h1>Splendorific</h1>
+        <div>Welcome!  Select an option to start a new game.</div>
         <button onClick={() => newGame({ players: 2 })}>
           New 2 Player Game
         </button>
@@ -96,6 +107,12 @@ const Home: NextPage = () => {
         </button>
         <button onClick={() => newGame({ players: 4 })}>
           New 4 Player Game
+        </button>
+      </Modal>
+
+      <div className={styles.shuffle}>
+        <button onClick={() => setShowMenu(true)}>
+          Menu
         </button>
       </div>
 
@@ -148,7 +165,10 @@ const Home: NextPage = () => {
             <div key={index}
               className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : undefined}`}
             >
-              <div className={styles.name}>Player {index + 1} ({player.points} points)</div>
+              <div className={styles.title}>
+                <div className={styles.name}>{player.name}</div>
+                <div className={styles.points}>{player.points} pts</div>
+              </div>
               {index === game.currentPlayerIndex && consideredGems.length > 0 ? (
                 <div className={styles.draftGems}>
                   {consideredGems.map((gem, index) => (
@@ -174,6 +194,20 @@ const Home: NextPage = () => {
                   />
                 ) : undefined)}
               </div>
+              
+              {player.reserved.length > 0 ? (
+                <div className={styles.reserved}>
+                  {player.reserved.map((card, i) => (
+                    <Card
+                      key={i}
+                      card={card}
+                      onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(i, card) : undefined}
+                      width={80}
+                    />
+                  ))}
+                </div>
+              ) : undefined}
+
               <div className={styles.cards}>
                 {player.cards.map((card, i) => (
                   <div key={i} className={styles.stacking}>
@@ -183,16 +217,6 @@ const Home: NextPage = () => {
                       hideCost
                     />
                   </div>
-                ))}
-              </div>
-              <div className={styles.reserved}>
-                {player.reserved.map((card, i) => (
-                  <Card
-                    key={i}
-                    card={card}
-                    onPurchase={() => purchaseReserved(i, card)}
-                    width={80}
-                  />
                 ))}
               </div>
               {player.nobles.map((noble, i) => (
