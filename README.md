@@ -13,7 +13,7 @@ Next.js, Typescript, Sass
  - simulation and AI tuning
  - multiplayer (socket.io)
 
-![image](https://user-images.githubusercontent.com/57601245/169945359-47c603b4-6ca5-41b3-be3d-b74ccf63c6a6.png)
+![image](https://user-images.githubusercontent.com/57601245/170912797-f90c0748-9a45-45b5-a0da-687532490f5d.png)
 
 ## References
 
