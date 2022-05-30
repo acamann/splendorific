@@ -26,18 +26,22 @@ const Card = ({ card, onPurchase, onReserve, width = 125, hideCost = false }: Pr
 
   const isClickable = onPurchase || onReserve;
 
+  const height = 7 * width / 5;
+  const costSize = width / 5;
+  const pointsFontSize = width * 0.28;
+
   return (
     <div
       className={`${styles.card} ${getClassNameFromGem(card.gem)} ${isHovered && styles.hovered}`}
       onMouseEnter={(): void => isClickable && setIsHovered(true)}
       onMouseLeave={(): void => isClickable && setIsHovered(false)}
-      style={{ width, height: 7 * width / 5 }}
+      style={{ width, height }}
     >
       <div className={styles.background} data-image-id={card.imageId}>
       </div>
       <div className={styles.content}>
         <div className={styles.top}>
-          <div className={styles.points} style={{ fontSize: width / 4 }}>
+          <div className={styles.points} style={{ fontSize: pointsFontSize }}>
             {card.points > 0 ? card.points : undefined}
           </div>
           <div className={styles.gem}></div>
@@ -50,7 +54,7 @@ const Card = ({ card, onPurchase, onReserve, width = 125, hideCost = false }: Pr
                 <li
                   key={key}
                   className={getClassNameFromGem(gem as NonGoldGem)}
-                  style={{ width: width / 5, height: width / 5, fontSize: width  * 0.18 }}
+                  style={{ width: costSize, height: costSize, fontSize: costSize }}
                 >
                   {card.cost.filter(c => c === gem as NonGoldGem).length}
                 </li>

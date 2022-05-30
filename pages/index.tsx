@@ -153,7 +153,7 @@ const Home: NextPage = () => {
                     <Chip
                       key={index}
                       gem={gem}
-                      size={40}
+                      size={30}
                       onClick={() => returnConsideredGem(index)}
                     />
                   ))}
@@ -167,7 +167,7 @@ const Home: NextPage = () => {
                   <Chip
                     key={gem}
                     gem={gem}
-                    size={60}
+                    size={40}
                     count={player.bank[gem]}
                   />
                 ) : undefined)}

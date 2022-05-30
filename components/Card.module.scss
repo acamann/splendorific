@@ -74,8 +74,8 @@
 
   .points {
     margin: 8px;
-    font-size: 2em;
     line-height: 100%;
+    padding-bottom: 2%; // fix font naturally sitting lower
     font-style: italic;
     font-weight: 800;
     color: black;
@@ -113,10 +113,10 @@
       width: 100%;
       height: 100%;
       border-radius: 100%;
+      padding-bottom: 10%; // fix font naturally sitting lower
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2em;
       font-style: italic;
       font-weight: 900;
       color: white;

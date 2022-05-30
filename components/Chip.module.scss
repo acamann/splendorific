@@ -60,11 +60,10 @@
     background-repeat: no-repeat;
     background-size: 500% 100%;
     background-image: url('/images/gems.png');
-
+    padding-bottom: 5%; // fix font naturally sitting low
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3em;
     font-weight: 600;
     color: white;
     -webkit-text-fill-color: white; /* Will override color (regardless of order) */
