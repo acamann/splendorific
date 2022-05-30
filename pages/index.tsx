@@ -104,7 +104,7 @@ const Home: NextPage = () => {
           <div className={styles.nobles}>
             {game.nobles !== "Loading" ? (
               game.nobles.map((noble, i) => (
-                <Noble key={i} noble={noble} />
+                <Noble key={i} noble={noble} width={100} />
               ))
             ) : undefined}
           </div>
@@ -135,6 +135,7 @@ const Home: NextPage = () => {
               <Chip
                 key={gem}
                 gem={gem}
+                size={70}
                 count={game.bank[gem] - consideredGems.filter(consideredGem => consideredGem === gem).length}
                 onClick={() => considerGem(gem)}
               />
