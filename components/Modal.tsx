@@ -8,7 +8,7 @@ type Props = {
   children: React.ReactNode;
 }
 
-const Modal = ({ isShowing, hide, children }: Props) => document.body && isShowing ? ReactDOM.createPortal(
+const Modal = ({ isShowing, hide, children }: Props) => isShowing ? ReactDOM.createPortal(
   <React.Fragment>
     <div className={styles.overlay}/>
     <div className={styles.wrapper} aria-modal aria-hidden tabIndex={-1} role="dialog">

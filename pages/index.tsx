@@ -16,7 +16,12 @@ import {
 import styles from '../styles/Home.module.scss'
 import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
-import Modal from '../components/Modal'
+import dynamic from 'next/dynamic'
+
+const Modal = dynamic(
+  () => import('./../components/Modal'),
+  { ssr: false }
+)
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
