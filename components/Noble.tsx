@@ -7,11 +7,10 @@ const cardColors: CardColor[] = ["green", "white", "blue", "black", "red"];
 
 type Props = {
   noble: NobleType;
-  onClick?: () => void;
 }
 
-const Noble = ({ noble, onClick }: Props) => (
-  <div className={styles.noble} onClick={onClick}>
+const Noble = ({ noble }: Props) => (
+  <div className={styles.noble}>
     <div className={styles.background}>
     </div>
     <div className={styles.content}>

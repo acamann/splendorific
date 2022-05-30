@@ -113,16 +113,17 @@ const Home: NextPage = () => {
             {game.decks !== "Loading" ? (
               [3, 2, 1] as Level[]).map(level => (
                 <>
-                  {game.decks[level].length > 4 ? <Stack level={level} /> : <CardPlaceholder />}
+                  {game.decks[level].length > 4 ? <Stack level={level} width={100} /> : <CardPlaceholder size={100} />}
                   {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
                     <Card key={i}
                       card={card}
+                      width={100}
                       onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(level, i, card) : undefined}
                       onReserve={() => reserveCard(level, i, card)}
                     />
                   ))}
                   {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
-                    <CardPlaceholder key={i} />
+                    <CardPlaceholder size={100} key={i} />
                   ) : undefined}
                 </>
               )
@@ -174,12 +175,13 @@ const Home: NextPage = () => {
               </div>
               <div className={styles.cards}>
                 {player.cards.map((card, i) => (
-                  <Card
-                    key={i}
-                    card={card}
-                    width={80}
-                    hideCost
-                  />
+                  <div key={i} className={styles.stacking}>
+                    <Card
+                      card={card}
+                      width={80}
+                      hideCost
+                    />
+                  </div>
                 ))}
               </div>
               <div className={styles.reserved}>
@@ -193,10 +195,7 @@ const Home: NextPage = () => {
                 ))}
               </div>
               {player.nobles.map((noble, i) => (
-                <Noble key={i}
-                  noble={noble}
-                  onClick={() => undefined}
-                />
+                <Noble key={i} noble={noble} />
               ))}
             </div>
           ))}
