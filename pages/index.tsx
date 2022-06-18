@@ -10,27 +10,28 @@ import useGame from '../hooks/useGame'
 import {
   ALL_GEMS,
   Card as CardType,
+  GameConfiguration,
   Gem,
   Level
 } from '../models'
 import styles from '../styles/Home.module.scss'
 import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
-import dynamic from 'next/dynamic'
-
-const Modal = dynamic(
-  () => import('./../components/Modal'),
-  { ssr: false }
-)
+import Menu from '../components/Menu'
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
   const [game, dispatch] = useGame();
   const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
 
-  const newGame = async ({ players }: { players: 2 | 3 | 4 }) => {
-    dispatch({ type: "NEW_GAME", players, dispatch });
-    setShowMenu(false);
+  const newGame = async (configuration: GameConfiguration) => {
+    if (configuration.mode === "tabletop") {
+      dispatch({
+        type: "NEW_GAME",
+        players: configuration.players,
+        dispatch
+      });
+    }
   };
 
   const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
@@ -101,19 +102,11 @@ const Home: NextPage = () => {
       </Head>
       <Toaster />
 
-      <Modal isShowing={showMenu} hide={() => setShowMenu(false)}>
-        <h1>Splendorific</h1>
-        <div>Welcome!  Select an option to start a new game.</div>
-        <button onClick={() => newGame({ players: 2 })}>
-          New 2 Player Game
-        </button>
-        <button onClick={() => newGame({ players: 3 })}>
-          New 3 Player Game
-        </button>
-        <button onClick={() => newGame({ players: 4 })}>
-          New 4 Player Game
-        </button>
-      </Modal>
+      <Menu
+        isOpen={showMenu}
+        close={() => setShowMenu(false)}
+        newGame={(configuration) => newGame(configuration)}
+      />
 
       <div className={styles.shuffle}>
         <button onClick={() => setShowMenu(true)}>
