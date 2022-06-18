@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Card from '../components/Card'
 import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
@@ -17,6 +17,7 @@ import styles from '../styles/Home.module.scss'
 import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic'
+import CardAnimation from '../components/CardAnimation'
 
 const Modal = dynamic(
   () => import('./../components/Modal'),
@@ -28,14 +29,19 @@ const Home: NextPage = () => {
   const [game, dispatch] = useGame();
   const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
 
+  const currentPlayerDeckRef = useRef<HTMLDivElement>(null);
+
   const newGame = async ({ players }: { players: 2 | 3 | 4 }) => {
     dispatch({ type: "NEW_GAME", players, dispatch });
     setShowMenu(false);
   };
 
-  const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+  const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType, source: HTMLElement): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       dispatch({ type: "PURCHASE_CARD", card, source: { deck: level }, index });
+      if (currentPlayerDeckRef.current) {
+        animateCard(card, source, currentPlayerDeckRef.current);
+      }
     } else {
       toast.error("Can't afford");
     }
@@ -49,9 +55,12 @@ const Home: NextPage = () => {
     }
   }
 
-  const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+  const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType, source: HTMLElement): void => {
     if (game.players[game.currentPlayerIndex].reserved.length < 3) {
       dispatch({ type: "RESERVE_CARD", card, level, index });
+      if (currentPlayerDeckRef.current) {
+        animateCard(card, source, currentPlayerDeckRef.current);
+      }
     } else {
       toast.error("Can only reserve 3 cards");
     }
@@ -91,6 +100,27 @@ const Home: NextPage = () => {
       toast.success(`WINNER! Congratulations ${game.players[game.winningPlayerIndex].name}`)
     }
   }, [game.winningPlayerIndex, game.players]);
+
+  // const { cardAnimations, animateCard } = useCardAnimation();
+
+  const animateCard = (card: CardType, source: HTMLElement, target: HTMLElement) => {
+    const milliseconds = 1000;
+    const start = { left: source.offsetLeft, top: source.offsetTop, width: source.offsetWidth };
+    const end = { left: target.offsetLeft, top: target.offsetTop, width: 80 };
+    setCardAnimations(existing => [...existing, {
+      card, start, end, milliseconds
+    }]);
+    // remove card from animation 
+    setInterval(() => {
+      setCardAnimations(existing => existing.filter(a => a.card !== card))
+    }, milliseconds);
+  }
+
+  const [cardAnimations, setCardAnimations] = useState<{
+    card: CardType,
+    start: { left: number, top: number },
+    end: { left: number, top: number }
+  }[]>([]);
 
   return (
     <>
@@ -132,6 +162,16 @@ const Home: NextPage = () => {
           </div>
 
           <div className={styles.cards}>
+            {cardAnimations.map(animation => {
+              return (
+                <CardAnimation
+                  key={JSON.stringify(animation.card)}
+                  card={animation.card}
+                  start={animation.start}
+                  end={animation.end}
+                />
+              )
+            })}
             {game.decks !== "Loading" ? (
               [3, 2, 1] as Level[]).map(level => (
                 <>
@@ -140,8 +180,8 @@ const Home: NextPage = () => {
                     <Card key={i}
                       card={card}
                       width={100}
-                      onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(level, i, card) : undefined}
-                      onReserve={() => reserveCard(level, i, card)}
+                      onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? (source) => purchaseCard(level, i, card, source) : undefined}
+                      onReserve={(source) => reserveCard(level, i, card, source)}
                     />
                   ))}
                   {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
@@ -189,7 +229,7 @@ const Home: NextPage = () => {
                   </button>
                 </div>
               ) : undefined}
-              <div className={styles.bank}>
+              <div className={styles.bank} ref={game.currentPlayerIndex === index ? currentPlayerDeckRef : null}>
                 {ALL_GEMS.map(gem => player.bank[gem] > 0 ? (
                   <Chip
                     key={gem}

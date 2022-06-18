@@ -20,6 +20,7 @@
 
 .card {
   position: relative;
+  transition: width 1000ms ease, height 1000ms ease;
 
   &.hovered .content {
     background-color: rgba(0, 0, 0, 0.5);

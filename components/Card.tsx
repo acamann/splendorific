@@ -4,8 +4,8 @@ import styles from "./Card.module.scss";
 
 type Props = {
   card: CardType;
-  onPurchase?: () => void;
-  onReserve?: () => void;
+  onPurchase?: (target: HTMLElement) => void;
+  onReserve?: (target: HTMLElement) => void;
   width?: number;
   hideCost?: boolean;
 }
@@ -64,8 +64,20 @@ const Card = ({ card, onPurchase, onReserve, width = 125, hideCost = false }: Pr
         ) : undefined}
         {isHovered ? (
           <div className={styles.actions}>
-            {onPurchase ? <button onClick={onPurchase}>Purchase</button> : undefined}
-            {onReserve ? <button onClick={onReserve}>Reserve</button> : undefined}
+            {onPurchase ? 
+              <button onClick={(e) => {
+                if (e.currentTarget.parentElement?.parentElement?.parentElement) {
+                  onPurchase(e.currentTarget.parentElement?.parentElement?.parentElement);
+                }
+              }}>
+                Purchase
+              </button> : undefined}
+            {onReserve ? 
+              <button onClick={(e) => {
+                if (e.currentTarget.parentElement?.parentElement?.parentElement) {
+                  onReserve(e.currentTarget.parentElement?.parentElement?.parentElement);
+                }
+              }}>Reserve</button> : undefined}
           </div>
         ) : undefined}
       </div>
