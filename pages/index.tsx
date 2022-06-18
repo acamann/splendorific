@@ -58,19 +58,14 @@ const Home: NextPage = () => {
   }
 
   const considerGem = (gem: Gem) => {
-    if (areValidGemsToConsider([...consideredGems, gem], game.bank)) {
-      setConsideredGems(previous => [...previous, gem]);
+    const allConsideredGems = [...consideredGems, gem];
+    if (isValidGemAction(allConsideredGems, game.bank)) {
+      dispatch({ type: "TAKE_GEMS", gems: allConsideredGems });
+      setConsideredGems([]);
+    } else if (areValidGemsToConsider(allConsideredGems, game.bank)) {
+      setConsideredGems(allConsideredGems);
     } else {
       toast.error("Invalid gem");
-    }
-  }
-
-  const takeConsideredGems = () => {
-    if (isValidGemAction(consideredGems, game.bank)) {
-      dispatch({ type: "TAKE_GEMS", gems: consideredGems });
-      setConsideredGems([]);
-    } else {
-      toast.error("Invalid gems")
     }
   }
 
@@ -184,9 +179,6 @@ const Home: NextPage = () => {
                       onClick={() => returnConsideredGem(index)}
                     />
                   ))}
-                  <button onClick={() => takeConsideredGems()} disabled={!isValidGemAction(consideredGems, game.bank)}>
-                    &#10003;
-                  </button>
                 </div>
               ) : undefined}
               <div className={styles.bank}>
