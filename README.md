@@ -8,6 +8,7 @@ Next.js, Typescript, Sass
 
  - game instance generation
  - css image sprites for cards, gems
+ - css transition for movement animations
  - basic gameplay, store in-game state
  - simple AI, play against computer with goals
  - simulation and AI tuning
