@@ -96,6 +96,15 @@ const Home: NextPage = () => {
     }
   }, [game.winningPlayerIndex, game.players]);
 
+  // Ideal Goal of Animation:
+  //  - triggered by state change (user selects chips or card)
+  //  - selected thing is animated from exact source location to exact target location (including size change)
+  //  - only single instace of item visible at any frame:
+  //    - placeholder in source gap during animation
+  //    - placeholder in target gap during animation
+  //  - subsequent refill animation, if applicable (new card flipped from deck to fill empty spot caused by selection)
+  //  - next move could begin during animation, and will animate independently
+
   // const { cardAnimations, animateCard } = useCardAnimation();
 
   const animateCard = (card: CardType, source: HTMLElement, target: HTMLElement) => {
