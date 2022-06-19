@@ -162,56 +162,73 @@ const Home: NextPage = () => {
                 <div className={styles.name}>{player.name}</div>
                 <div className={styles.points}>{player.points} pts</div>
               </div>
-              {index === game.currentPlayerIndex && consideredGems.length > 0 ? (
-                <div className={styles.draftGems}>
-                  {consideredGems.map((gem, index) => (
-                    <Chip
-                      key={index}
-                      gem={gem}
-                      size={30}
-                      onClick={() => returnConsideredGem(index)}
-                    />
-                  ))}
-                </div>
-              ) : undefined}
-              <div className={styles.bank}>
-                {ALL_GEMS.map(gem => player.bank[gem] > 0 ? (
-                  <Chip
-                    key={gem}
-                    gem={gem}
-                    size={40}
-                    count={player.bank[gem]}
-                  />
-                ) : undefined)}
-              </div>
-              
-              {player.reserved.length > 0 ? (
-                <div className={styles.reserved}>
-                  {player.reserved.map((card, i) => (
-                    <Card
-                      key={i}
-                      card={card}
-                      onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(i, card) : undefined}
-                      width={80}
-                    />
-                  ))}
-                </div>
-              ) : undefined}
+              <div className={styles.playerContent}>
+                <div className={styles.left}>
+                  {index === game.currentPlayerIndex && consideredGems.length > 0 ? (
+                    <div className={styles.draftGems}>
+                      {consideredGems.map((gem, index) => (
+                        <Chip
+                          key={index}
+                          gem={gem}
+                          size={30}
+                          onClick={() => returnConsideredGem(index)}
+                        />
+                      ))}
+                    </div>
+                  ) : undefined}
 
-              <div className={styles.cards}>
-                {player.cards.map((card, i) => (
-                  <div key={i} className={styles.stacking}>
-                    <Card
-                      card={card}
-                      width={80}
-                      hideCost
-                    />
+                  <div className={styles.bank}>
+                    {ALL_GEMS.map(gem => player.bank[gem] > 0 ? (
+                      <Chip
+                        key={gem}
+                        gem={gem}
+                        size={40}
+                        count={player.bank[gem]}
+                      />
+                    ) : undefined)}
                   </div>
-                ))}
+
+                  <div className={styles.cards}>
+                    {player.cards.map((card, i) => (
+                      <div key={i} className={styles.stacking}>
+                        <Card
+                          card={card}
+                          width={70}
+                          hideCost
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.right}>
+                  {player.nobles.map((noble, i) => (
+                    <Noble
+                      key={i}
+                      noble={noble}
+                      width={70}
+                    />
+                  ))}
+                  {player.reserved.length > 0 ? (
+                    <div
+                      className={styles.reserved}
+                      style={{
+                        height: player.reserved.length > 0 ? 75 + (25 * player.reserved.length) : undefined,
+                        width: player.reserved.length > 0 ? 45 + (25 * player.reserved.length) : undefined,
+                      }}
+                    >
+                      {player.reserved.map((card, i) => (
+                        <Card
+                          key={i}
+                          card={card}
+                          onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(i, card) : undefined}
+                          width={70}
+                        />
+                      ))}
+                    </div>
+                  ) : undefined}
+                </div>
               </div>
-              {player.nobles.map((noble, i) => (
-                <Noble key={i} noble={noble} />
-              ))}
             </div>
           ))}
         </div>
