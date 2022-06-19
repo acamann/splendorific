@@ -203,10 +203,9 @@ const reducer = (state: GameState, action: Action): GameState => {
       let playerPoints = state.players[state.currentPlayerIndex].points;
       playerPoints = playerPoints + card.points;
 
-      // figure out how to store in state sanely
       const earnedNobles: Noble[] = []
       if (state.nobles !== "Loading") {
-        const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
+        const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards, card]);
         for (const noble of state.nobles) {
           if (isPlayerEligibleForNoble(playerCardValues, noble)) {
             // if qualified for this noble, take the points & remove the noble
@@ -224,14 +223,16 @@ const reducer = (state: GameState, action: Action): GameState => {
           ...state.decks,
           [source.deck]: newDeck
         },
-        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
+        players: state.players.map((player, playerIndex) => playerIndex === state.currentPlayerIndex ? ({
           ...player,
           cards: [...player.cards, card],
           reserved: source === "reserved" ? player.reserved.filter((r, i) => i !== index) : player.reserved,
           bank: playerBank,
-          points: playerPoints
+          points: playerPoints,
+          nobles: [...player.nobles, ...earnedNobles]
         }) : player),
         bank: bank,
+        nobles: state.nobles === "Loading" ? "Loading" : state.nobles.filter(n => !earnedNobles.includes(n)),
         winningPlayerIndex: playerPoints >= 15 ? state.currentPlayerIndex : undefined,
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
