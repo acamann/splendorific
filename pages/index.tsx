@@ -41,9 +41,7 @@ const Home: NextPage = () => {
   const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType, source: HTMLElement): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       dispatch({ type: "PURCHASE_CARD", card, source: { deck: level }, index });
-      if (currentPlayerDeckRef.current) {
-        animateCard(card, source, currentPlayerDeckRef.current);
-      }
+      animateCard(card, source, document.getElementById(`player-${game.currentPlayerIndex}-cards`));
     } else {
       toast.error("Can't afford");
     }
@@ -60,9 +58,7 @@ const Home: NextPage = () => {
   const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType, source: HTMLElement): void => {
     if (game.players[game.currentPlayerIndex].reserved.length < 3) {
       dispatch({ type: "RESERVE_CARD", card, level, index });
-      if (currentPlayerDeckRef.current) {
-        animateCard(card, source, currentPlayerDeckRef.current);
-      }
+      animateCard(card, source, document.getElementById(`player-${game.currentPlayerIndex}-reserved`));
     } else {
       toast.error("Can only reserve 3 cards");
     }
@@ -109,17 +105,19 @@ const Home: NextPage = () => {
 
   // const { cardAnimations, animateCard } = useCardAnimation();
 
-  const animateCard = (card: CardType, source: HTMLElement, target: HTMLElement) => {
-    const milliseconds = 1000;
-    const start = { left: source.offsetLeft, top: source.offsetTop, width: source.offsetWidth };
-    const end = { left: target.offsetLeft, top: target.offsetTop, width: 80 };
-    setCardAnimations(existing => [...existing, {
-      card, start, end, milliseconds
-    }]);
-    // remove card from animation 
-    setInterval(() => {
-      setCardAnimations(existing => existing.filter(a => a.card !== card))
-    }, milliseconds);
+  const animateCard = (card: CardType, source: HTMLElement, target: HTMLElement | null) => {
+    if (target) {
+      const milliseconds = 1000;
+      const start = { left: source.offsetLeft, top: source.offsetTop, width: source.offsetWidth };
+      const end = { left: target.offsetLeft, top: target.offsetTop, width: 80 };
+      setCardAnimations(existing => [...existing, {
+        card, start, end, milliseconds
+      }]);
+      // remove card from animation 
+      setInterval(() => {
+        setCardAnimations(existing => existing.filter(a => a.card !== card))
+      }, milliseconds);
+    }
   }
 
   const [cardAnimations, setCardAnimations] = useState<{
@@ -206,7 +204,8 @@ const Home: NextPage = () => {
         <div className={styles.players}>
           {game.players.map((player, index) => (
             <div key={index}
-              className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : undefined}`}
+              className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : ""}`}
+              ref={game.currentPlayerIndex === index ? currentPlayerDeckRef : undefined}
             >
               <div className={styles.title}>
                 <div className={styles.name}>{player.name}</div>
@@ -238,7 +237,10 @@ const Home: NextPage = () => {
                     ) : undefined)}
                   </div>
 
-                  <div className={styles.cards}>
+                  <div 
+                    id={`player-${index}-cards`}
+                    className={styles.cards}
+                  >
                     {player.cards.map((card, i) => (
                       <div key={i} className={styles.stacking}>
                         <Card
@@ -259,24 +261,25 @@ const Home: NextPage = () => {
                       width={70}
                     />
                   ))}
-                  {player.reserved.length > 0 ? (
-                    <div
-                      className={styles.reserved}
-                      style={{
-                        height: player.reserved.length > 0 ? 75 + (25 * player.reserved.length) : undefined,
-                        width: player.reserved.length > 0 ? 45 + (25 * player.reserved.length) : undefined,
-                      }}
-                    >
-                      {player.reserved.map((card, i) => (
-                        <Card
-                          key={i}
-                          card={card}
-                          onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(i, card) : undefined}
-                          width={70}
-                        />
-                      ))}
-                    </div>
-                  ) : undefined}
+
+                  <div
+                    id={`player-${index}-reserved`}
+                    className={styles.reserved}
+                    style={{
+                      height: player.reserved.length > 0 ? 75 + (25 * player.reserved.length) : 0,
+                      width: player.reserved.length > 0 ? 45 + (25 * player.reserved.length) : 0,
+                    }}
+                  >
+                    {player.reserved.map((card, i) => (
+                      <Card
+                        key={i}
+                        card={card}
+                        onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(i, card) : undefined}
+                        width={70}
+                      />
+                    ))}
+                  </div>
+
                 </div>
               </div>
             </div>
