@@ -224,7 +224,7 @@ const reducer = (state: GameState, action: Action): GameState => {
           ...state.decks,
           [source.deck]: newDeck
         },
-        players: state.players.map((player, index) => index === state.currentPlayerIndex ? ({
+        players: state.players.map((player, playerIndex) => playerIndex === state.currentPlayerIndex ? ({
           ...player,
           cards: [...player.cards, card],
           reserved: source === "reserved" ? player.reserved.filter((r, i) => i !== index) : player.reserved,
