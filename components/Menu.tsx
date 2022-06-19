@@ -26,9 +26,8 @@ const Menu = ({
   }
 
   return (
-    <Modal isShowing={isOpen} hide={close}>
+    <Modal title="Splendorific" isShowing={isOpen} hide={close}>
       <div className={styles.menu}>
-        <h1>Splendorific</h1>
         <div>Welcome!  Select an option to start a new game.</div>
 
         <h2>Tabletop</h2>
@@ -45,7 +44,7 @@ const Menu = ({
           </button>
         </div>
 
-        <h2>Online</h2>
+        {/* <h2>Online</h2>
         <div className={styles.description}>Human players playing live from different devices.</div>
         <div className={styles.options}>
           <button onClick={() => newGame({ mode: "online" })}>
@@ -57,7 +56,7 @@ const Menu = ({
               Join Game
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </Modal>
   )
