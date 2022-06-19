@@ -46,3 +46,11 @@ export type Player = {
   nobles: Noble[];
   points: number;
 }
+
+export type GameConfiguration = {
+  mode: "tabletop";
+  players: 2 | 3 | 4;
+} | {
+  mode: "online";
+  roomId?: string;
+}
