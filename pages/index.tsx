@@ -15,7 +15,7 @@ import {
   Level
 } from '../models'
 import styles from '../styles/Home.module.scss'
-import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
+import { areValidGemsToConsider, canPlayerAffordCard, getTotalChipCount, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
 import Menu from '../components/Menu'
 import WinModal from '../components/WinModal'
@@ -52,16 +52,24 @@ const Home: NextPage = () => {
   }
 
   const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
-    if (game.players[game.currentPlayerIndex].reserved.length < 3) {
-      dispatch({ type: "RESERVE_CARD", card, level, index });
-    } else {
+    if (game.players[game.currentPlayerIndex].reserved.length >= 3) {
       toast.error("Can only reserve 3 cards");
+    } else if (game.bank[Gem.Gold] > 0 && getTotalChipCount(game.players[game.currentPlayerIndex].bank) === 10) {
+      // will have more than 10 after reserving, force selection to return or cancel
+      toast.error("Cannot have more than 10 chips");
+    } else {
+      dispatch({ type: "RESERVE_CARD", card, level, index });
     }
   }
 
   const considerGem = (gem: Gem) => {
     const allConsideredGems = [...consideredGems, gem];
     if (isValidGemAction(allConsideredGems, game.bank)) {
+      if (getTotalChipCount(game.players[game.currentPlayerIndex].bank) + allConsideredGems.length > 10) {
+        // will have more than 10 after reserving, force selection to return or cancel
+        toast.error("Cannot have more than 10 chips");
+        return;
+      }
       dispatch({ type: "TAKE_GEMS", gems: allConsideredGems });
       setConsideredGems([]);
     } else if (areValidGemsToConsider(allConsideredGems, game.bank)) {

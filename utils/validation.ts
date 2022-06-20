@@ -80,3 +80,6 @@ export const areValidGemsToConsider = (consideredGems: Gem[], bank: Bank) => {
   }
   return true;
 }
+
+export const getTotalChipCount = (bank: Bank): number =>
+  Object.values(bank).reduce((sum, current) => sum + current, 0);
