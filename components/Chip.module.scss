@@ -8,6 +8,7 @@
 
   &.gold {
     background-color: $gold;
+    .gem { background-position: 100% 0; }
   }
   &.onyx {
     background-color: $onyx;
@@ -15,19 +16,19 @@
   }
   &.sapphire {
     background-color: $sapphire;
-    .gem { background-position: 25% 0; }
+    .gem { background-position: 20% 0; }
   }
   &.diamond {
     background-color: $diamond;
-    .gem { background-position: 50% 0; }
+    .gem { background-position: 40% 0; }
   }
   &.emerald {
     background-color: $emerald;
-    .gem { background-position: 75% 0; }
+    .gem { background-position: 60% 0; }
   }
   &.ruby {
     background-color: $ruby;
-    .gem { background-position: 100% 0; }
+    .gem { background-position: 80% 0; }
   }
 }
 
@@ -58,8 +59,8 @@
     height: 60%;
     width: 75%;
     background-repeat: no-repeat;
-    background-size: 500% 100%;
-    background-image: url('/images/gems.png');
+    background-size: 600% 100%;
+    background-image: url('/images/gemswithgold.png');
     padding-bottom: 5%; // fix font naturally sitting low
     display: flex;
     align-items: center;
