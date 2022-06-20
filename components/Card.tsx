@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card as CardType, Gem, NonGoldGem } from "../models";
 import styles from "./Card.module.scss";
 
@@ -29,6 +29,10 @@ const Card = ({ card, onPurchase, onReserve, width = 125, hideCost = false }: Pr
   const height = 7 * width / 5;
   const costSize = width / 5;
   const pointsFontSize = width * 0.28;
+
+  useEffect(() => {
+    setIsHovered(false);
+  }, [card]);
 
   return (
     <div
