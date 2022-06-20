@@ -20,9 +20,7 @@ const Modal = ({ title, isShowing, hide, children }: Props) => isShowing ? React
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <p>
-          {children}
-        </p>
+        {children}
       </div>
     </div>
   </React.Fragment>, document.body

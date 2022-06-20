@@ -18,6 +18,7 @@ import styles from '../styles/Home.module.scss'
 import { areValidGemsToConsider, canPlayerAffordCard, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
 import Menu from '../components/Menu'
+import WinModal from '../components/WinModal'
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
@@ -82,12 +83,6 @@ const Home: NextPage = () => {
     }
   }, [game.error]);
 
-  useEffect(() => {
-    if (game.winningPlayerIndex !== undefined) {
-      toast.success(`WINNER! Congratulations ${game.players[game.winningPlayerIndex].name}`)
-    }
-  }, [game.winningPlayerIndex, game.players]);
-
   return (
     <>
       <Head>
@@ -96,6 +91,16 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Toaster />
+
+      {game.winningPlayerIndex !== undefined ? (
+        <WinModal
+          winner={game.players[game.winningPlayerIndex].name}
+          close={() => {
+            dispatch({ type: "RESET_GAME" });
+            setShowMenu(true);
+          }}
+        />
+      ) : undefined}
 
       <Menu
         isOpen={showMenu}

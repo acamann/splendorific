@@ -27,6 +27,7 @@ const initialState: GameState = {
 }
 
 const initialPlayerState: Player = {
+  name: "Unknown",
   bank: getEmptyBank(),
   cards: [],
   reserved: [],
@@ -37,13 +38,15 @@ const initialPlayerState: Player = {
 type GameAction = {
   type: "NEW_GAME",
   players: 2 | 3 | 4,
-  dispatch: Dispatch<Action>;
+  dispatch: Dispatch<Action>
 } | {
   type: "SET_DECKS",
   decks: Decks
 } | {
   type: "SET_NOBLES",
   nobles: Noble[]
+} | {
+  type: "RESET_GAME"
 }
 
 type PlayerAction = {
@@ -65,6 +68,9 @@ type Action = GameAction | PlayerAction;
 
 const reducer = (state: GameState, action: Action): GameState => {
   switch (action.type) {
+    case 'RESET_GAME': {
+      return initialState;
+    }
     case 'NEW_GAME': {
       const noblesCount = action.players + 1;
       fetch(`/api/nobles/${noblesCount}`).then(resp => {

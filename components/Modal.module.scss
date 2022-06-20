@@ -29,6 +29,9 @@
   border-radius: 3px;
   max-width: 500px;
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .header {
