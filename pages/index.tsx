@@ -109,7 +109,7 @@ const Home: NextPage = () => {
     if (target) {
       const milliseconds = 1000;
       const start = { left: source.offsetLeft, top: source.offsetTop, width: source.offsetWidth };
-      const end = { left: target.offsetLeft, top: target.offsetTop, width: 80 };
+      const end = { left: target.offsetLeft, top: target.offsetTop, width: 70 };
       setCardAnimations(existing => [...existing, {
         card, start, end, milliseconds
       }]);
