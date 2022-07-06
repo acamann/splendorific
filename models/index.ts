@@ -7,6 +7,17 @@ export enum Gem {
   Gold,
 }
 
+export const getGemName = (gem: Gem): string => {
+  switch (gem) {
+    case Gem.Emerald: return "Emerald";
+    case Gem.Sapphire: return "Sapphire";
+    case Gem.Diamond: return "Diamond";
+    case Gem.Ruby: return "Ruby";
+    case Gem.Onyx: return "Onyx";
+    case Gem.Gold: return "Gold";
+  }
+}
+
 export const ALL_GEMS = (Object.keys(Gem)
   .filter(key => isNaN(Number(key))) as (keyof typeof Gem)[])
   .map(key => Gem[key]);
@@ -24,6 +35,8 @@ export type Card = {
   cost: NonGoldGem[],
   imageId: number,
 }
+
+export const cardToString = (card: Card): string => `Lev:${card.level}, Gem: ${card.gem}, Pts:${card.points}`;
 
 export type Decks = {
   [level in Level]: Card[]
