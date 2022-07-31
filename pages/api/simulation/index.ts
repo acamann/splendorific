@@ -364,6 +364,7 @@ interface SimulationResponse {
     experience: number;
     wins: number;
   }[];
+  averageTurns?: number;
   failures?: string[];
   gameLog?: string[][]
 }
@@ -391,19 +392,23 @@ export default function handler(
     const wins: number[] = Array(simulationRequest.players.length).fill(0);
     const failures: string[] = [];
     const gameLog: string[][] = [];
+    const turns: number[] = [];
     for (let i = 0; i < simulationRequest.games; i++)
     {
       try {
+        let gameTurn = 1;
         let game = getRandomGame(simulationRequest.players.length);
         let winningPlayerIndex: number | undefined = undefined;
         while (!winningPlayerIndex) {
           game = takeRandomTurn(game);
           if (game.currentPlayerIndex === 0) {
+            gameTurn++;
             // don't start next round if there was a winner in this one
             if (game.players.some(player => player.points >= 15)) {
               const winner = game.players.reduce((prev, current) => (prev.points > current.points) ? prev : current);
               winningPlayerIndex = game.players.indexOf(winner);
               game.log.push(`${winner.name} wins with ${winner.points} points!`);
+              turns.push(gameTurn);
               break;
             }
           }
@@ -422,6 +427,7 @@ export default function handler(
         experience: player.experience,
         wins: wins[playerIndex]
       })),
+      averageTurns: turns.reduce((a, b) => a + b) / turns.length,
       failures: failures.length > 0 ? failures : undefined,
       gameLog: verbose ? gameLog : undefined
     });
