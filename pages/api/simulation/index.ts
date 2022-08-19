@@ -400,6 +400,7 @@ export default function handler(
         let game = getRandomGame(simulationRequest.players.length);
         let winningPlayerIndex: number | undefined = undefined;
         while (!winningPlayerIndex) {
+          // make this randomly choose between takeBestAvailableTurn & takeRandomTurn depending on experience level
           game = takeRandomTurn(game);
           if (game.currentPlayerIndex === 0) {
             gameTurn++;
