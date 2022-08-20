@@ -346,6 +346,68 @@ const takeRandomTurn = (game: GameState): GameState => {
   throw new Error("No known available moves for current player!");
 }
 
+const takeWiseTurn = (game: GameState): GameState => {
+
+  // calculate desirability for every visible card:
+  // points * 20
+  // can afford now? minus 0 & keep in list
+  // TODO: can afford next turn? minus 10 & keep in list
+  // else? ignore card
+  // subtract number of chips required to spend from player bank
+
+  // can purchase now + 5 points = 100 minus number of chips required
+  // can purchase next turn + 5 points = 90 minus number of chips required
+  // can purchase now + 4 points = 80
+  // can purchase next turn + 4 points = 70
+  // can purchase now + 3 points = 60
+  // can purchase next turn + 3 points = 50
+  // can purchase now + 2 points = 40
+  // can purchase next turn + 2 points = 30
+  // can purchase now + 1 point = 20
+  // can purchase next turn + 1 point = 10
+
+  const desiredCards = (getVisibleCards(game.decks).map(card => {
+    const canAfford = canPlayerAffordCard(game.players[game.currentPlayerIndex], card);
+    // TODO: consider cards that could be purchased on NEXT turn
+    if (canAfford) {
+      const playerCurrentCardsValue = getBankValueOfCards(game.players[game.currentPlayerIndex].cards);
+      let chipsRequiredFromPlayerBank = 0;
+      card.cost.forEach(gem => {
+        if (playerCurrentCardsValue[gem] > 0) {
+          playerCurrentCardsValue[gem]--;
+        } else if (playerCurrentCardsValue[Gem.Gold] > 0) {
+          playerCurrentCardsValue[Gem.Gold]--;
+        } else {
+          chipsRequiredFromPlayerBank++;
+        }
+      });
+      return {
+        card,
+        desirability: card.points * 20 - chipsRequiredFromPlayerBank
+      }
+    } else {
+      return undefined;
+    }
+  }).filter(d => d !== undefined) as { card: Card, desirability: number }[])
+    .sort((a, b) => b.desirability - a.desirability); // sorts descending
+
+  //console.log(desiredCards);
+
+  for (let index = 0; index < desiredCards.length; index++) {
+    const desiredCard = desiredCards[index].card;
+    //  - purchase desired card (if able)
+    if (canPlayerAffordCard(game.players[game.currentPlayerIndex], desiredCard)) {
+      return takeTurnPurchaseCard(game, desiredCard);
+    }
+    //  - take other affordable card, if with it could purchase desired card (if able)
+    //  - take available chips to get closer to desired card (if able)
+    //  - reserve (if able)
+  }
+
+  // otherwise take random turn
+  return takeRandomTurn(game);
+}
+
 interface SimulatedPlayerRequest {
   experience: number;
 }
@@ -400,8 +462,15 @@ export default function handler(
         let game = getRandomGame(simulationRequest.players.length);
         let winningPlayerIndex: number | undefined = undefined;
         while (!winningPlayerIndex) {
+
           // make this randomly choose between takeBestAvailableTurn & takeRandomTurn depending on experience level
-          game = takeRandomTurn(game);
+          const currentPlayerExperience = simulationRequest.players[game.currentPlayerIndex].experience
+          if (currentPlayerExperience > Math.random()) {
+            game = takeWiseTurn(game);
+          } else {
+            game = takeRandomTurn(game);
+          }
+
           if (game.currentPlayerIndex === 0) {
             gameTurn++;
             // don't start next round if there was a winner in this one
