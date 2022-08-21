@@ -136,3 +136,5 @@ const takeWiseTurn = (game: GameState): GameState => {
 // more likely to take wise turn with greater experience
 export const takeTurnAI = (game: GameState, experience: number): GameState => 
   (experience > Math.random()) ? takeWiseTurn(game) : takeRandomTurn(game);
+
+// better AI idea is for wise turn to be able to consider X turns in the future dependent on experience

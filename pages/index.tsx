@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Card from '../components/Card'
 import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
@@ -39,24 +39,33 @@ const Home: NextPage = () => {
     setGame(getRandomGame(players));
   };
 
+  const isComputersTurn = useMemo(() => game.players[game.currentPlayerIndex]?.aiExperience !== undefined, [game.currentPlayerIndex, game.players]);
+  const isGameOver = useMemo(() => game.winningPlayerIndex !== undefined, [game.winningPlayerIndex]);
+
   const purchaseCard = (card: CardType): void => {
-    if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
-      setGame(game => takeTurnPurchaseCard(game, card))
-    } else {
+    if (isComputersTurn) {
+      toast.error("Not your turn");
+    } else if (!canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       toast.error("Can't afford");
+    } else {
+      setGame(game => takeTurnPurchaseCard(game, card))
     }
   }
 
   const purchaseReserved = (card: CardType): void => {
-    if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
-      setGame(game => takeTurnPurchaseReservedCard(game, card));
-    } else {
+    if (isComputersTurn) {
+      toast.error("Not your turn");
+    } else if (!canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       toast.error("Can't afford");
+    } else {
+      setGame(game => takeTurnPurchaseReservedCard(game, card));
     }
   }
 
   const reserveCard = (card: CardType): void => {
-    if (game.players[game.currentPlayerIndex].reserved.length >= 3) {
+    if (isComputersTurn) {
+      toast.error("Not your turn");
+    } else if (game.players[game.currentPlayerIndex].reserved.length >= 3) {
       toast.error("Can only reserve 3 cards");
     } else if (game.bank[Gem.Gold] > 0 && getTotalChipCount(game.players[game.currentPlayerIndex].bank) === 10) {
       // will have more than 10 after reserving
@@ -68,10 +77,14 @@ const Home: NextPage = () => {
   }
 
   const considerGem = (gem: Gem) => {
+    if (isComputersTurn) {
+      toast.error("Not your turn");
+      return;
+    }
     const allConsideredGems = [...consideredGems, gem];
     if (isValidGemAction(allConsideredGems, game.bank)) {
       if (getTotalChipCount(game.players[game.currentPlayerIndex].bank) + allConsideredGems.length > 10) {
-        // will have more than 10 after reserving, force selection to return or cancel
+        // will have more than 10 after this one, force selection to return or cancel
         toast.error("Cannot have more than 10 chips");
         return;
       }
@@ -96,16 +109,22 @@ const Home: NextPage = () => {
     }
   }, [game.error]);
 
-  useEffect(() => {
-    if (!game.winningPlayerIndex && game.players[game.currentPlayerIndex]) {
+  const takeComputerTurn = () => {
+    setGame(game => {
       const currentPlayerAiExperience = game.players[game.currentPlayerIndex].aiExperience;
-      if (currentPlayerAiExperience) {
-        setTimeout(() => {
-          setGame(game => takeTurnAI(game, currentPlayerAiExperience));
-        }, MILLISECONDS_BETWEEN_TURNS);
+      return currentPlayerAiExperience !== undefined ? takeTurnAI(game, currentPlayerAiExperience) : game;
+    });
+  }
+
+  useEffect(() => {
+    if (!isGameOver && isComputersTurn) {
+      const computerMove = setTimeout(takeComputerTurn, MILLISECONDS_BETWEEN_TURNS);
+      return () => {
+        clearTimeout(computerMove);
       }
     }
-  }, [game.currentPlayerIndex, game.players, game.winningPlayerIndex]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.currentPlayerIndex, game.players]);
 
   return (
     <>
