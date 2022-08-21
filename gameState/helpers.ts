@@ -85,6 +85,8 @@ export const isPlayerEligibleForNoble = (playerCardValues: Bank, noble: Noble): 
   return true;
 }
 
+// TODO: fix! does not take into account most recent turn
+// need to splat state changes on top of each other for each individual effect of a turn
 export const getWinningPlayerIndex = (game: GameState): number | undefined => {
   if (game.winningPlayerIndex) {
     // game already has winner
