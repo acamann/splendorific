@@ -78,7 +78,7 @@ export const getRandomGame = (players: Player[]): GameState => {
     ...initialState,
     players,
     bank,
-    nobles: nobleDeck.slice(0, noblesCount - 1),
+    nobles: nobleDeck.slice(0, noblesCount),
     decks: {
       [1]: deck.filter(card => card.level === 1),
       [2]: deck.filter(card => card.level === 2),
