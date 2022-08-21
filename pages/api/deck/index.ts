@@ -4,6 +4,7 @@ import { deck } from '../../../data/deck';
 import { Decks } from '../../../models';
 import { shuffle } from '../../../utils/array';
 
+// TODO: unused api, remove?
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Decks>

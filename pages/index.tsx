@@ -6,7 +6,6 @@ import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
 import Noble from '../components/Noble'
 import Stack from '../components/Stack'
-import useGame from '../hooks/useGame'
 import {
   ALL_GEMS,
   Card as CardType,
@@ -20,25 +19,22 @@ import toast, { Toaster } from 'react-hot-toast';
 import Menu from '../components/Menu'
 import WinModal from '../components/WinModal'
 import { canPlayerAffordCard, getTotalChipCount } from '../gameState/helpers'
+import { GameState, getRandomGame, initialState, takeTurnPurchaseCard, takeTurnPurchaseReservedCard, takeTurnReserveCard, takeTurnTakeChips } from '../gameState'
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
-  const [game, dispatch] = useGame();
+  const [game, setGame] = useState<GameState>(initialState);
   const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
 
   const newGame = async (configuration: GameConfiguration) => {
     if (configuration.mode === "tabletop") {
-      dispatch({
-        type: "NEW_GAME",
-        players: configuration.players,
-        dispatch
-      });
+      setGame(getRandomGame(configuration.players))
     }
   };
 
   const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
-      dispatch({ type: "PURCHASE_CARD", card, source: { deck: level }, index });
+      setGame(game => takeTurnPurchaseCard(game, card))
     } else {
       toast.error("Can't afford");
     }
@@ -46,7 +42,7 @@ const Home: NextPage = () => {
 
   const purchaseReserved = (index: number, card: CardType): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
-      dispatch({ type: "PURCHASE_CARD", card, source: "reserved", index });
+      setGame(game => takeTurnPurchaseReservedCard(game, card));
     } else {
       toast.error("Can't afford");
     }
@@ -56,10 +52,11 @@ const Home: NextPage = () => {
     if (game.players[game.currentPlayerIndex].reserved.length >= 3) {
       toast.error("Can only reserve 3 cards");
     } else if (game.bank[Gem.Gold] > 0 && getTotalChipCount(game.players[game.currentPlayerIndex].bank) === 10) {
-      // will have more than 10 after reserving, force selection to return or cancel
+      // will have more than 10 after reserving
+      // TODO: force selection to return or cancel
       toast.error("Cannot have more than 10 chips");
     } else {
-      dispatch({ type: "RESERVE_CARD", card, level, index });
+      setGame(game => takeTurnReserveCard(game, card));
     }
   }
 
@@ -71,7 +68,7 @@ const Home: NextPage = () => {
         toast.error("Cannot have more than 10 chips");
         return;
       }
-      dispatch({ type: "TAKE_GEMS", gems: allConsideredGems });
+      setGame(game => takeTurnTakeChips(game, allConsideredGems));
       setConsideredGems([]);
     } else if (areValidGemsToConsider(allConsideredGems, game.bank)) {
       setConsideredGems(allConsideredGems);
@@ -87,10 +84,10 @@ const Home: NextPage = () => {
   }
 
   useEffect(() => {
-    if (game.error) {
-      toast.error(game.error);
+    if (game?.error) {
+      toast.error(game?.error);
     }
-  }, [game.error]);
+  }, [game]);
 
   return (
     <>
@@ -105,7 +102,7 @@ const Home: NextPage = () => {
         <WinModal
           winner={game.players[game.winningPlayerIndex].name}
           close={() => {
-            dispatch({ type: "RESET_GAME" });
+            setGame(initialState);
             setShowMenu(true);
           }}
         />

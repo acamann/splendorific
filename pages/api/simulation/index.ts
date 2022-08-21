@@ -1,52 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { shuffle } from '../../../utils/array';
-import { nobleDeck } from '../../../data/nobles';
-import { deck } from '../../../data/deck';
-import { Bank, Gem } from '../../../models';
 import { takeTurnAI } from '../../../ai';
-import { GameState, initialPlayerState, initialState } from '../../../gameState';
-
-const getRandomGame = (players: 2 | 3 | 4): GameState => {
-  const noblesCount = players + 1;
-  shuffle(nobleDeck);
-  shuffle(deck);
-
-  let bankChips = 7;
-  if (players === 3) {
-    bankChips = 5;
-  }
-  if (players === 2) {
-    bankChips = 4;
-  }
-
-  const bank: Bank = {
-    [Gem.Diamond]: bankChips,
-    [Gem.Onyx]: bankChips,
-    [Gem.Emerald]: bankChips,
-    [Gem.Ruby]: bankChips,
-    [Gem.Sapphire]: bankChips,
-    [Gem.Gold]: 7, // leave the gold chips alone
-  }
-
-  return {
-    ...initialState,
-    players: Array(players)
-      .fill(initialPlayerState)
-      .map((player, i) => ({
-        ...player,
-        name: `Player ${i + 1}`
-      })),
-    bank,
-    nobles: nobleDeck.slice(0, noblesCount - 1),
-    decks: {
-      [1]: deck.filter(card => card.level === 1),
-      [2]: deck.filter(card => card.level === 2),
-      [3]: deck.filter(card => card.level === 3)
-    },
-    currentPlayerIndex: 0
-  }
-};
+import { getRandomGame } from '../../../gameState';
 
 interface SimulatedPlayerRequest {
   experience: number;
