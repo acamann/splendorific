@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Card from '../components/Card'
 import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
@@ -21,12 +21,11 @@ import { canPlayerAffordCard, getTotalChipCount } from '../gameState/helpers'
 import { GameState, getRandomGame, initialPlayerState, initialState, takeTurnPurchaseCard, takeTurnPurchaseReservedCard, takeTurnReserveCard, takeTurnTakeChips } from '../gameState'
 import { takeTurnAI } from '../ai'
 
-const MILLISECONDS_BETWEEN_TURNS = 750;
-
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
   const [game, setGame] = useState<GameState>(initialState);
   const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
+  const [speed, setSpeed] = useState<number>(50);
 
   const newGame = async (playerSettings: { name: string, aiExperience?: number }[]) => {
     const players = playerSettings.map(player => {
@@ -118,7 +117,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if (!isGameOver && isComputersTurn) {
-      const computerMove = setTimeout(takeComputerTurn, MILLISECONDS_BETWEEN_TURNS);
+      const computerMove = setTimeout(takeComputerTurn, (100 - speed) * 20);
       return () => {
         clearTimeout(computerMove);
       }
@@ -155,6 +154,14 @@ const Home: NextPage = () => {
         <button onClick={() => setShowMenu(true)}>
           Menu
         </button>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={speed}
+          onChange={(e) => setSpeed(e.currentTarget.value as unknown as number)}
+        />
       </div>
 
       <main className={styles.main}>
