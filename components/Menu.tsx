@@ -31,6 +31,19 @@ const Menu = ({
     setPlayers(previous => previous.map((p, i) => i === playerIndex ? { ...p, aiExperience } : p));
   }
 
+  const addPlayer = (): void => {
+    const playerNumber = players.length + 1;
+    setPlayers(previous => [...previous, { name: `Player ${playerNumber}`, aiExperience: 0.5 }]);
+  }
+
+  const removePlayer = (index: number): void => {
+    setPlayers(previous => {
+      const newPlayers = [...previous];
+      newPlayers.splice(index, 1);
+      return newPlayers;
+    });
+  }
+
   return (
     <Modal title="Splendorific" isShowing={isOpen} hide={close}>
       <div className={styles.menu}>
@@ -62,8 +75,14 @@ const Menu = ({
                 />
               </label>
             ) : undefined}
+            {players.length > 2 ? (
+              <button onClick={() => removePlayer(index)}>Remove Player</button>
+            ) : undefined}
           </div>
         ))}
+        {players.length < 4 ? (
+          <button onClick={addPlayer}>Add Player</button>
+        ) : undefined}
 
         <button onClick={() => {
           newGame(players);
