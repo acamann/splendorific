@@ -12,6 +12,7 @@ import {
   getBankValueOfCards,
   getEmptyBank,
   getNextPlayerIndex,
+  getWinningPlayerIndex,
   isPlayerEligibleForNoble
 } from "./helpers";
 
@@ -21,7 +22,9 @@ export type GameState = {
   nobles: Noble[];
   players: Player[];
   currentPlayerIndex: number;
+  winningPlayerIndex?: number;
   log: string[];
+  error?: string;
 }
 
 export const initialState: GameState = {
@@ -112,6 +115,7 @@ export const takeTurnPurchaseCard = (game: GameState, cardToPurchase: Card): Gam
     bank: newBank,
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
+    winningPlayerIndex: getWinningPlayerIndex(game),
     log: [...game.log, `${game.players[game.currentPlayerIndex].name} purchased card: (${cardToString(cardToPurchase)}). Total points: ${playerPoints}`]
   }
 }
@@ -134,6 +138,7 @@ export const takeTurnTakeChips = (game: GameState, chipsToTake: Gem[]) => {
       bank: playerBank
     }) : player),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
+    winningPlayerIndex: getWinningPlayerIndex(game),
     log: [...game.log, `${game.players[game.currentPlayerIndex].name} took chips: ${chipsToTake.map(c => getGemName(c)).join(", ")}.`]
   };
 }
@@ -175,6 +180,7 @@ export const takeTurnReserveCard = (game: GameState, cardToReserve: Card) => {
       [Gem.Gold]: isGoldAvailable ? game.bank[Gem.Gold] - 1 : game.bank[Gem.Gold]
     },
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
+    winningPlayerIndex: getWinningPlayerIndex(game),
     log: [...game.log, `${game.players[game.currentPlayerIndex].name} reserved card: (${cardToString(cardToReserve)}).`]
   }
 }
@@ -230,6 +236,7 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
     bank: newBank,
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
+    winningPlayerIndex: getWinningPlayerIndex(game),
     log: [...game.log, `${game.players[game.currentPlayerIndex].name} purchased reserved card: (${cardToString(reservedCardToPurchase)}). Total points: ${playerPoints}`]
   }
 }

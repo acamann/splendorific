@@ -1,18 +1,8 @@
 import { Dispatch, useReducer } from "react";
-import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
-import { initialPlayerState, initialState } from "../gameState";
+import { Bank, Card, Decks, Gem, Noble } from "../models";
+import { GameState, initialPlayerState, initialState } from "../gameState";
 import { isValidGemAction } from "../utils/validation";
-import { getBankValueOfCards, isPlayerEligibleForNoble } from "../gameState/helpers";
-
-type GameState = {
-  bank: Bank;
-  decks: "Loading" | Decks;
-  nobles: "Loading" | Noble[];
-  players: Player[];
-  currentPlayerIndex: number;
-  winningPlayerIndex?: number;
-  error?: string; // TODO: resolve this discrepency
-}
+import { getBankValueOfCards, getWinningPlayerIndex, isPlayerEligibleForNoble } from "../gameState/helpers";
 
 type GameAction = {
   type: "NEW_GAME",
@@ -93,8 +83,12 @@ const reducer = (state: GameState, action: Action): GameState => {
 
       return {
         ...state,
-        decks: "Loading",
-        nobles: "Loading",
+        decks: {
+          1: [],
+          2: [],
+          3: []
+        },
+        nobles: [],
         players: Array(action.players)
           .fill(initialPlayerState)
           .map((player, i) => ({
@@ -139,22 +133,23 @@ const reducer = (state: GameState, action: Action): GameState => {
           ...player,
           bank: playerBank
         }) : player),
+        winningPlayerIndex: getWinningPlayerIndex(state),
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       };
     };
     case 'PURCHASE_CARD': {
-      if (state.decks === "Loading") {
-        return { ...state }
-      }
+      // if (state.decks === "Loading") {
+      //   return { ...state }
+      // }
 
       const { source, card, index } = action;
 
       const bank = { ...state.bank };
       const playerBank = { ...state.players[state.currentPlayerIndex].bank };
-      const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
+      const playerCardValuesForPurchase = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards]);
       for (const gem of card.cost) {
-        if (playerCardValues[gem] > 0) {
-          playerCardValues[gem]--;
+        if (playerCardValuesForPurchase[gem] > 0) {
+          playerCardValuesForPurchase[gem]--;
         } else if (playerBank[gem] > 0) {
           playerBank[gem]--;
           bank[gem]++;
@@ -189,16 +184,16 @@ const reducer = (state: GameState, action: Action): GameState => {
       playerPoints = playerPoints + card.points;
 
       const earnedNobles: Noble[] = []
-      if (state.nobles !== "Loading") {
-        const playerCardValues = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards, card]);
+      //if (state.nobles !== "Loading") {
+        const playerCardValuesForNoble = getBankValueOfCards([...state.players[state.currentPlayerIndex].cards, card]);
         for (const noble of state.nobles) {
-          if (isPlayerEligibleForNoble(playerCardValues, noble)) {
+          if (isPlayerEligibleForNoble(playerCardValuesForNoble, noble)) {
             // if qualified for this noble, take the points & remove the noble
             playerPoints = playerPoints + noble.points;
             earnedNobles.push(noble);
           }
         }
-      }
+      //}
 
       return {
         ...state,
@@ -217,15 +212,15 @@ const reducer = (state: GameState, action: Action): GameState => {
           nobles: [...player.nobles, ...earnedNobles]
         }) : player),
         bank: bank,
-        nobles: state.nobles === "Loading" ? "Loading" : state.nobles.filter(n => !earnedNobles.includes(n)),
-        winningPlayerIndex: playerPoints >= 15 ? state.currentPlayerIndex : undefined,
+        nobles: state.nobles.filter(n => !earnedNobles.includes(n)),
+        winningPlayerIndex: getWinningPlayerIndex(state),
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }
     case 'RESERVE_CARD': {
-      if (state.decks === "Loading") {
-        return { ...state }
-      }
+      // if (state.decks === "Loading") {
+      //   return { ...state }
+      // }
 
       const { level, card, index } = action;
 
@@ -260,6 +255,7 @@ const reducer = (state: GameState, action: Action): GameState => {
           ...state.bank,
           [Gem.Gold]: isGoldAvailable ? state.bank[Gem.Gold] - 1 : state.bank[Gem.Gold]
         },
+        winningPlayerIndex: getWinningPlayerIndex(state),
         currentPlayerIndex: (state.currentPlayerIndex < state.players.length - 1) ? state.currentPlayerIndex + 1 : 0
       }
     }

@@ -84,3 +84,21 @@ export const isPlayerEligibleForNoble = (playerCardValues: Bank, noble: Noble): 
   if (playerCardValues[Gem.Ruby] < noble.red) return false;
   return true;
 }
+
+export const getWinningPlayerIndex = (game: GameState): number | undefined => {
+  if (game.winningPlayerIndex) {
+    // game already has winner
+    return game.winningPlayerIndex;
+  } else if (game.currentPlayerIndex < game.players.length - 1) {
+    // have not completed full round
+    return undefined;
+  } else if (!game.players.some(player => player.points >= 15)) {
+    // no one has 15 points
+    return undefined;
+  } else {
+    // since at least one player has 15 points, see who has the most points
+    // TODO: tie breaker
+    const winner = game.players.reduce((prev, current) => (prev.points > current.points) ? prev : current);
+    return game.players.indexOf(winner);
+  }
+}

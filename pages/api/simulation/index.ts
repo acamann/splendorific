@@ -98,6 +98,25 @@ export default function handler(
     for (let i = 0; i < simulationRequest.games; i++)
     {
       try {
+        // Should work like this... but doesn't
+        // let gameTurn = 0;
+        // let game = getRandomGame(simulationRequest.players.length);
+        // while (!game.winningPlayerIndex) {
+        //   if (game.currentPlayerIndex === 0) {
+        //     gameTurn++;
+        //   }
+
+        //   const currentPlayerExperience = simulationRequest.players[game.currentPlayerIndex].experience
+        //   game = takeTurnAI(game, currentPlayerExperience);
+        // }
+        // const winningPlayerIndex = game.winningPlayerIndex as number;
+        // const winner = game.players[winningPlayerIndex];
+        // game.log.push(`${winner.name} wins with ${winner.points} points!`);
+
+        // wins[winningPlayerIndex]++;
+        // turns.push(gameTurn);
+        // gameLog.push(game.log);
+
         let gameTurn = 1;
         let game = getRandomGame(simulationRequest.players.length);
         let winningPlayerIndex: number | undefined = undefined;

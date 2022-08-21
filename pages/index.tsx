@@ -15,10 +15,11 @@ import {
   Level
 } from '../models'
 import styles from '../styles/Home.module.scss'
-import { areValidGemsToConsider, canPlayerAffordCard, getTotalChipCount, isValidGemAction } from '../utils/validation';
+import { areValidGemsToConsider, isValidGemAction } from '../utils/validation';
 import toast, { Toaster } from 'react-hot-toast';
 import Menu from '../components/Menu'
 import WinModal from '../components/WinModal'
+import { canPlayerAffordCard, getTotalChipCount } from '../gameState/helpers'
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
@@ -125,32 +126,28 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <div className={styles.board}>
           <div className={styles.nobles}>
-            {game.nobles !== "Loading" ? (
-              game.nobles.map((noble, i) => (
-                <Noble key={i} noble={noble} width={100} />
-              ))
-            ) : undefined}
+            {game.nobles.map((noble, i) => (
+              <Noble key={i} noble={noble} width={100} />
+            ))}
           </div>
 
           <div className={styles.cards}>
-            {game.decks !== "Loading" ? (
-              [3, 2, 1] as Level[]).map(level => (
-                <>
-                  {game.decks[level].length > 4 ? <Stack level={level} width={100} /> : <CardPlaceholder size={100} />}
-                  {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
-                    <Card key={i}
-                      card={card}
-                      width={100}
-                      onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(level, i, card) : undefined}
-                      onReserve={() => reserveCard(level, i, card)}
-                    />
-                  ))}
-                  {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
-                    <CardPlaceholder size={100} key={i} />
-                  ) : undefined}
-                </>
-              )
-            ) : undefined}
+            {([3, 2, 1] as Level[]).map(level => (
+              <>
+                {game.decks[level].length > 4 ? <Stack level={level} width={100} /> : <CardPlaceholder size={100} />}
+                {(game.decks[level] as CardType[]).slice(0, 4).map((card, i) => (
+                  <Card key={i}
+                    card={card}
+                    width={100}
+                    onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(level, i, card) : undefined}
+                    onReserve={() => reserveCard(level, i, card)}
+                  />
+                ))}
+                {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
+                  <CardPlaceholder size={100} key={i} />
+                ) : undefined}
+              </>
+            ))}
           </div>
 
           <div className={styles.bank}>
