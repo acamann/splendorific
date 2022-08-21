@@ -36,7 +36,7 @@ const Home: NextPage = () => {
     setGame(getRandomGame(players));
   };
 
-  const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+  const purchaseCard = (card: CardType): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       setGame(game => takeTurnPurchaseCard(game, card))
     } else {
@@ -44,7 +44,7 @@ const Home: NextPage = () => {
     }
   }
 
-  const purchaseReserved = (index: number, card: CardType): void => {
+  const purchaseReserved = (card: CardType): void => {
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], card)) {
       setGame(game => takeTurnPurchaseReservedCard(game, card));
     } else {
@@ -52,7 +52,7 @@ const Home: NextPage = () => {
     }
   }
 
-  const reserveCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
+  const reserveCard = (card: CardType): void => {
     if (game.players[game.currentPlayerIndex].reserved.length >= 3) {
       toast.error("Can only reserve 3 cards");
     } else if (game.bank[Gem.Gold] > 0 && getTotalChipCount(game.players[game.currentPlayerIndex].bank) === 10) {
@@ -146,8 +146,8 @@ const Home: NextPage = () => {
                   <Card key={i}
                     card={card}
                     width={100}
-                    onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(level, i, card) : undefined}
-                    onReserve={() => reserveCard(level, i, card)}
+                    onPurchase={canPlayerAffordCard(game.players[game.currentPlayerIndex], card) ? () => purchaseCard(card) : undefined}
+                    onReserve={() => reserveCard(card)}
                   />
                 ))}
                 {game.decks[level].length < 4 ? Array.from(Array(4 - game.decks[level].length)).map((_, i) => 
@@ -238,7 +238,7 @@ const Home: NextPage = () => {
                         <Card
                           key={i}
                           card={card}
-                          onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(i, card) : undefined}
+                          onPurchase={index === game.currentPlayerIndex ? () => purchaseReserved(card) : undefined}
                           width={70}
                         />
                       ))}
