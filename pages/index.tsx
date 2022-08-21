@@ -84,10 +84,16 @@ const Home: NextPage = () => {
   }
 
   useEffect(() => {
-    if (game?.error) {
-      toast.error(game?.error);
+    if (game.error) {
+      toast.error(game.error);
     }
-  }, [game]);
+  }, [game.error]);
+
+  useEffect(() => {
+    // get type of current player
+    // if AI, wait a bit (depending on configured speed), then take turn
+    // if not, do nothing and wait for human input
+  }, [game.currentPlayerIndex]);
 
   return (
     <>
