@@ -49,10 +49,12 @@ const takeRandomTurn = (game: GameState): GameState => {
     return takeTurnTakeChips(game, gemsToTake);
   }
 
-  // reserve random level one card, if able
+  // reserve random card from lowest available level, if able
   if (game.players[game.currentPlayerIndex].reserved.length < 3) {
-    const visibleLevelOneCards = getVisibleCards(game.decks, 1);
-    const cardToReserve = visibleLevelOneCards[Math.floor(Math.random()*visibleLevelOneCards.length)];
+    const visibleCards = getVisibleCards(game.decks);
+    const lowestLevelAvailable = visibleCards.reduce((previousLowestLevel, currentCard) => currentCard.level < previousLowestLevel ? currentCard.level : previousLowestLevel, 3)
+    const visibleCardsAtLowestLevelAvailable = visibleCards.filter(card => card.level === lowestLevelAvailable);
+    const cardToReserve = visibleCardsAtLowestLevelAvailable[Math.floor(Math.random()*visibleCardsAtLowestLevelAvailable.length)];
     return takeTurnReserveCard(game, cardToReserve);
   }
 
