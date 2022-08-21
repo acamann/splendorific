@@ -21,6 +21,7 @@ interface SimulationResponse {
   players: {
     experience: number;
     wins: number;
+    winPercentage: number;
   }[];
   averageTurns?: number;
   failures?: string[];
@@ -111,7 +112,8 @@ export default function handler(
       games: simulationRequest.games,
       players: simulationRequest.players.map((player, playerIndex) => ({
         experience: player.experience,
-        wins: wins[playerIndex]
+        wins: wins[playerIndex],
+        winPercentage: wins[playerIndex] / simulationRequest.games
       })),
       averageTurns: turns.reduce((a, b) => a + b) / turns.length,
       failures: failures.length > 0 ? failures : undefined,
