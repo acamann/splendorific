@@ -1,0 +1,136 @@
+import {
+  Card,
+  Gem,
+  NonGoldGem
+} from "../models";
+import {
+  GameState,
+  takeTurnPurchaseCard,
+  takeTurnPurchaseReservedCard,
+  takeTurnReserveCard,
+  takeTurnTakeChips
+} from "../gameState";
+import {
+  bankHasThreeChipsAvailable,
+  canPlayerAffordCard,
+  getAffordableCards,
+  getAffordableReservedCards,
+  getBankValueOfCards,
+  getTotalChipCount,
+  getVisibleCards
+} from "../gameState/helpers";
+
+const takeRandomTurn = (game: GameState): GameState => {
+  // Purchase reserved card, if able
+  const affordableReservedCards = getAffordableReservedCards(game, game.currentPlayerIndex)
+  if (affordableReservedCards.length > 0) {
+    const randomAffordableReservedCard = affordableReservedCards[Math.floor(Math.random()*affordableReservedCards.length)];
+    return takeTurnPurchaseReservedCard(game, randomAffordableReservedCard);
+  }
+
+  // Purchase available card, if able
+  const affordableCards = getAffordableCards(game, game.currentPlayerIndex);
+  if (affordableCards.length) {
+    // select card to purchase at random
+    const randomAffordableCard = affordableCards[Math.floor(Math.random()*affordableCards.length)];
+    return takeTurnPurchaseCard(game, randomAffordableCard);
+  }
+
+  // take 3 random chips, if able
+  const playerChipCount = getTotalChipCount(game.players[game.currentPlayerIndex].bank)
+  if (playerChipCount < 8 && bankHasThreeChipsAvailable(game.bank)) {
+    const gemsToTake: Gem[] = [];
+    while (gemsToTake.length < 3) {
+      const randomGem = Math.floor(Math.random()*5) as NonGoldGem; // make this smarter/safer
+      if (!gemsToTake.includes(randomGem) && game.bank[randomGem] > 0) {
+        gemsToTake.push(randomGem);
+      }
+    }
+    return takeTurnTakeChips(game, gemsToTake);
+  }
+
+  // reserve random level one card, if able
+  if (game.players[game.currentPlayerIndex].reserved.length < 3) {
+    const visibleLevelOneCards = getVisibleCards(game.decks, 1);
+    const cardToReserve = visibleLevelOneCards[Math.floor(Math.random()*visibleLevelOneCards.length)];
+    return takeTurnReserveCard(game, cardToReserve);
+  }
+
+  // if all else fails, take random chips only up to the chip limit (not a likely fallback)...
+  if (playerChipCount < 10 && bankHasThreeChipsAvailable(game.bank)) {
+    const gemsToTake: Gem[] = [];
+    while (gemsToTake.length < 10 - playerChipCount) {
+      const randomGem = Math.floor(Math.random()*5) as NonGoldGem; // make this smarter/safer
+      if (!gemsToTake.includes(randomGem) && game.bank[randomGem] > 0) {
+        gemsToTake.push(randomGem);
+      }
+    }
+    return takeTurnTakeChips(game, gemsToTake);
+  }
+
+  throw new Error("No known available moves for current player!");
+}
+
+const takeWiseTurn = (game: GameState): GameState => {
+
+  // calculate desirability for every visible card:
+  // points * 20
+  // can afford now? minus 0 & keep in list
+  // TODO: can afford next turn? minus 10 & keep in list
+  // else? ignore card
+  // subtract number of chips required to spend from player bank
+
+  // can purchase now + 5 points = 100 minus number of chips required
+  // can purchase next turn + 5 points = 90 minus number of chips required
+  // can purchase now + 4 points = 80
+  // can purchase next turn + 4 points = 70
+  // can purchase now + 3 points = 60
+  // can purchase next turn + 3 points = 50
+  // can purchase now + 2 points = 40
+  // can purchase next turn + 2 points = 30
+  // can purchase now + 1 point = 20
+  // can purchase next turn + 1 point = 10
+
+  const desiredCards = (getVisibleCards(game.decks).map(card => {
+    const canAfford = canPlayerAffordCard(game.players[game.currentPlayerIndex], card);
+    // TODO: consider cards that could be purchased on NEXT turn
+    if (canAfford) {
+      const playerCurrentCardsValue = getBankValueOfCards(game.players[game.currentPlayerIndex].cards);
+      let chipsRequiredFromPlayerBank = 0;
+      card.cost.forEach(gem => {
+        if (playerCurrentCardsValue[gem] > 0) {
+          playerCurrentCardsValue[gem]--;
+        } else if (playerCurrentCardsValue[Gem.Gold] > 0) {
+          playerCurrentCardsValue[Gem.Gold]--;
+        } else {
+          chipsRequiredFromPlayerBank++;
+        }
+      });
+      return {
+        card,
+        desirability: card.points * 20 - chipsRequiredFromPlayerBank
+      }
+    } else {
+      return undefined;
+    }
+  }).filter(d => d !== undefined) as { card: Card, desirability: number }[])
+    .sort((a, b) => b.desirability - a.desirability); // sorts descending
+
+  for (let index = 0; index < desiredCards.length; index++) {
+    const desiredCard = desiredCards[index].card;
+    //  - purchase desired card (if able)
+    if (canPlayerAffordCard(game.players[game.currentPlayerIndex], desiredCard)) {
+      return takeTurnPurchaseCard(game, desiredCard);
+    }
+    //  - take other affordable card, if with it could purchase desired card (if able)
+    //  - take available chips to get closer to desired card (if able)
+    //  - reserve (if able)
+  }
+
+  // otherwise take random turn
+  return takeRandomTurn(game);
+}
+
+// more likely to take wise turn with greater experience
+export const takeTurnAI = (game: GameState, experience: number): GameState => 
+  (experience > Math.random()) ? takeWiseTurn(game) : takeRandomTurn(game);

@@ -1,6 +1,8 @@
 import { Dispatch, useReducer } from "react";
 import { Bank, Card, Decks, Gem, Noble, Player } from "../models";
-import { getBankValueOfCards, getEmptyBank, isPlayerEligibleForNoble, isValidGemAction } from "../utils/validation";
+import { initialPlayerState, initialState } from "../gameState";
+import { isValidGemAction } from "../utils/validation";
+import { getBankValueOfCards, isPlayerEligibleForNoble } from "../gameState/helpers";
 
 type GameState = {
   bank: Bank;
@@ -9,30 +11,7 @@ type GameState = {
   players: Player[];
   currentPlayerIndex: number;
   winningPlayerIndex?: number;
-  error: string;
-}
-
-const initialState: GameState = {
-  bank: getEmptyBank(),
-  decks: {
-    [1]: [],
-    [2]: [],
-    [3]: []
-  },
-  nobles: [],
-  players: [],
-  currentPlayerIndex: 0,
-  winningPlayerIndex: undefined,
-  error: ""
-}
-
-const initialPlayerState: Player = {
-  name: "Unknown",
-  bank: getEmptyBank(),
-  cards: [],
-  reserved: [],
-  nobles: [],
-  points: 0
+  error?: string; // TODO: resolve this discrepency
 }
 
 type GameAction = {
