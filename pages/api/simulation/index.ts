@@ -1,7 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { takeTurnAI } from '../../../ai';
-import { getRandomGame } from '../../../gameState';
+import { getRandomGame, initialPlayerState } from '../../../gameState';
+import { Player } from '../../../models';
 
 interface SimulatedPlayerRequest {
   experience: number;
@@ -73,7 +74,14 @@ export default function handler(
         // gameLog.push(game.log);
 
         let gameTurn = 1;
-        let game = getRandomGame(simulationRequest.players.length);
+        const simulationPlayers: Player[] = simulationRequest.players.map((p, i) => {
+          return {
+            ...initialPlayerState,
+            name: `Player ${i + 1}`,
+            aiExperience: p.experience
+          }
+        })
+        let game = getRandomGame(simulationPlayers);
         let winningPlayerIndex: number | undefined = undefined;
         while (!winningPlayerIndex) {
           const currentPlayerExperience = simulationRequest.players[game.currentPlayerIndex].experience

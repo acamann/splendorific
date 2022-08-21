@@ -52,16 +52,16 @@ export const initialPlayerState: Player = {
   points: 0
 }
 
-export const getRandomGame = (players: 2 | 3 | 4): GameState => {
-  const noblesCount = players + 1;
+export const getRandomGame = (players: Player[]): GameState => {
+  const noblesCount = players.length + 1;
   shuffle(nobleDeck);
   shuffle(deck);
 
   let bankChips = 7;
-  if (players === 3) {
+  if (players.length === 3) {
     bankChips = 5;
   }
-  if (players === 2) {
+  if (players.length === 2) {
     bankChips = 4;
   }
 
@@ -76,12 +76,7 @@ export const getRandomGame = (players: 2 | 3 | 4): GameState => {
 
   return {
     ...initialState,
-    players: Array(players)
-      .fill(initialPlayerState)
-      .map((player, i) => ({
-        ...player,
-        name: `Player ${i + 1}`
-      })),
+    players,
     bank,
     nobles: nobleDeck.slice(0, noblesCount - 1),
     decks: {

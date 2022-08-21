@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { GameConfiguration } from "../models";
 import styles from "./Menu.module.scss";
 
 const Modal = dynamic(
@@ -11,7 +10,7 @@ const Modal = dynamic(
 interface Props {
   isOpen: boolean;
   close: () => void;
-  newGame: (configuration: GameConfiguration) => void;
+  newGame: (players: { name: string, aiExperience?: number }[]) => void;
 }
 
 const Menu = ({
@@ -19,44 +18,59 @@ const Menu = ({
   close,
   newGame,
 }: Props) => {
+  const [players, setPlayers] = useState<{ name: string, aiExperience?: number }[]>([
+    { name: "Player 1" },
+    { name: "Player 2", aiExperience: 0.5 }
+  ]);
 
-  const newTableTopGame = (players: 2 | 3 | 4) => () => {
-    newGame({ players, mode: "tabletop" });
-    close();
+  const onChangeName = (playerIndex: number, name: string) => {
+    setPlayers(previous => previous.map((p, i) => i === playerIndex ? { ...p, name } : p));
+  }
+
+  const onChangeAiExperience = (playerIndex: number, aiExperience?: number ) => {
+    setPlayers(previous => previous.map((p, i) => i === playerIndex ? { ...p, aiExperience } : p));
   }
 
   return (
     <Modal title="Splendorific" isShowing={isOpen} hide={close}>
       <div className={styles.menu}>
-        <div>Welcome!  Select an option to start a new game.</div>
+        <div>Welcome!  Configure your game.</div>
 
-        <h2>Tabletop</h2>
+        <h2>Players</h2>
         <div className={styles.description}>Human players taking turns on the same device.</div>
-        <div className={styles.options}>
-          <button onClick={newTableTopGame(2)}>
-            New 2 Player Game
-          </button>
-          <button onClick={newTableTopGame(3)}>
-            New 3 Player Game
-          </button>
-          <button onClick={newTableTopGame(4)}>
-            New 4 Player Game
-          </button>
-        </div>
-
-        {/* <h2>Online</h2>
-        <div className={styles.description}>Human players playing live from different devices.</div>
-        <div className={styles.options}>
-          <button onClick={() => newGame({ mode: "online" })}>
-            Create Game
-          </button>
-          <div>
-            <input />
-            <button onClick={() => newGame({ mode: "online", roomId: "something from input" })}>
-              Join Game
-            </button>
+        {players.map((player, index) => (
+          <div key={index}>
+            <input value={player.name} onChange={(e) => onChangeName(index, e.target.value)} />
+            <label>
+              <input
+                type="checkbox"
+                checked={player.aiExperience !== undefined}
+                onChange={(e) => onChangeAiExperience(index, e.currentTarget.checked ? 0.5 : undefined)}
+              />
+              Computer
+            </label>
+            {player.aiExperience ? (
+              <label>
+                Experience
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={player.aiExperience}
+                  onChange={(e) => onChangeAiExperience(index, e.currentTarget.value as unknown as number)}
+                />
+              </label>
+            ) : undefined}
           </div>
-        </div> */}
+        ))}
+
+        <button onClick={() => {
+          newGame(players);
+          close();
+        }}>
+          Start
+        </button>
       </div>
     </Modal>
   )

@@ -58,12 +58,5 @@ export type Player = {
   reserved: Card[];
   nobles: Noble[];
   points: number;
-}
-
-export type GameConfiguration = {
-  mode: "tabletop";
-  players: 2 | 3 | 4;
-} | {
-  mode: "online";
-  roomId?: string;
+  aiExperience?: number;
 }

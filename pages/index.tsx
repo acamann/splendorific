@@ -9,9 +9,8 @@ import Stack from '../components/Stack'
 import {
   ALL_GEMS,
   Card as CardType,
-  GameConfiguration,
   Gem,
-  Level
+  Level,
 } from '../models'
 import styles from '../styles/Home.module.scss'
 import { areValidGemsToConsider, isValidGemAction } from '../utils/validation';
@@ -19,17 +18,22 @@ import toast, { Toaster } from 'react-hot-toast';
 import Menu from '../components/Menu'
 import WinModal from '../components/WinModal'
 import { canPlayerAffordCard, getTotalChipCount } from '../gameState/helpers'
-import { GameState, getRandomGame, initialState, takeTurnPurchaseCard, takeTurnPurchaseReservedCard, takeTurnReserveCard, takeTurnTakeChips } from '../gameState'
+import { GameState, getRandomGame, initialPlayerState, initialState, takeTurnPurchaseCard, takeTurnPurchaseReservedCard, takeTurnReserveCard, takeTurnTakeChips } from '../gameState'
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
   const [game, setGame] = useState<GameState>(initialState);
   const [consideredGems, setConsideredGems] = useState<Gem[]>([]);
 
-  const newGame = async (configuration: GameConfiguration) => {
-    if (configuration.mode === "tabletop") {
-      setGame(getRandomGame(configuration.players))
-    }
+  const newGame = async (playerSettings: { name: string, aiExperience?: number }[]) => {
+    const players = playerSettings.map(player => {
+      return {
+        ...initialPlayerState,
+        name: player.name,
+        aiExperience: player.aiExperience
+      }
+    });
+    setGame(getRandomGame(players));
   };
 
   const purchaseCard = (level: 1 | 2 | 3, index: number, card: CardType): void => {
@@ -117,7 +121,7 @@ const Home: NextPage = () => {
       <Menu
         isOpen={showMenu}
         close={() => setShowMenu(false)}
-        newGame={(configuration) => newGame(configuration)}
+        newGame={(players) => newGame(players)}
       />
 
       <div className={styles.shuffle}>
