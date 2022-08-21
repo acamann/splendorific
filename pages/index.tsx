@@ -19,6 +19,9 @@ import Menu from '../components/Menu'
 import WinModal from '../components/WinModal'
 import { canPlayerAffordCard, getTotalChipCount } from '../gameState/helpers'
 import { GameState, getRandomGame, initialPlayerState, initialState, takeTurnPurchaseCard, takeTurnPurchaseReservedCard, takeTurnReserveCard, takeTurnTakeChips } from '../gameState'
+import { takeTurnAI } from '../ai'
+
+const MILLISECONDS_BETWEEN_TURNS = 750;
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
@@ -94,10 +97,15 @@ const Home: NextPage = () => {
   }, [game.error]);
 
   useEffect(() => {
-    // get type of current player
-    // if AI, wait a bit (depending on configured speed), then take turn
-    // if not, do nothing and wait for human input
-  }, [game.currentPlayerIndex]);
+    if (!game.winningPlayerIndex && game.players[game.currentPlayerIndex]) {
+      const currentPlayerAiExperience = game.players[game.currentPlayerIndex].aiExperience;
+      if (currentPlayerAiExperience) {
+        setTimeout(() => {
+          setGame(game => takeTurnAI(game, currentPlayerAiExperience));
+        }, MILLISECONDS_BETWEEN_TURNS);
+      }
+    }
+  }, [game.currentPlayerIndex, game.players, game.winningPlayerIndex]);
 
   return (
     <>
