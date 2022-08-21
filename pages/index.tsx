@@ -210,7 +210,7 @@ const Home: NextPage = () => {
               className={`${styles.player} ${game.currentPlayerIndex === index ? styles.current : undefined}`}
             >
               <div className={styles.title}>
-                <div className={styles.name}>{player.name}</div>
+                <div className={styles.name}>{player.name}{player.aiExperience ? ` (${Math.round(player.aiExperience * 100)}% Exp)` : ""}</div>
                 <div className={styles.points}>{player.points} pts</div>
               </div>
               <div className={styles.playerContent}>
