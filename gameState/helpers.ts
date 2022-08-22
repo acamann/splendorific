@@ -91,7 +91,7 @@ export const getWinningPlayerIndex = (game: GameState): number | undefined => {
   if (game.winningPlayerIndex) {
     // game already has winner
     return game.winningPlayerIndex;
-  } else if (game.currentPlayerIndex < game.players.length - 1) {
+  } else if (game.currentPlayerIndex !== 0) {
     // have not completed full round
     return undefined;
   } else if (!game.players.some(player => player.points >= 15)) {
@@ -99,8 +99,10 @@ export const getWinningPlayerIndex = (game: GameState): number | undefined => {
     return undefined;
   } else {
     // since at least one player has 15 points, see who has the most points
-    // TODO: tie breaker
-    const winner = game.players.reduce((prev, current) => (prev.points > current.points) ? prev : current);
+    // (tie breaker: fewest development cards wins)
+    const winner = [...game.players]
+      .sort((a, b) => a.points !== b.points ? b.points - a.points : a.cards.length - b.cards.length)
+      [0];
     return game.players.indexOf(winner);
   }
 }
