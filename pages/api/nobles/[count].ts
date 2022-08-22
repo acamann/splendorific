@@ -9,6 +9,7 @@ type ErrorApi = {
   message: string;
 }
 
+// TODO: unused api, remove?
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Noble[] | ErrorApi>

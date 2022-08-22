@@ -4,6 +4,7 @@ import { Noble } from '../../../models';
 import { shuffle } from '../../../utils/array';
 import { nobleDeck } from '../../../data/nobles';
 
+// TODO: unused api, remove?
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Noble[]>
