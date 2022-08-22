@@ -1,21 +1,22 @@
 .menu {
-  h2 {
-    margin-bottom: 0;
-  }
-
-  .description {
-    font-style: italic;
-  }
-
   .player {
     padding: 16px;
     display: flex;
     flex-direction: column;
 
+    h3 {
+      margin: 4px 0;
+    }
+
     .name {
-      padding: 8px;
-      border-radius: 8px;
-      border: solid 1px darkgray;
+      display: flex;
+      align-items: center;
+      input {
+        padding: 8px;
+        border-radius: 8px;
+        border: solid 1px darkgray;
+        width: 100%;
+      }
     }
 
     label {
@@ -27,7 +28,7 @@
   }
 
   button {
-    margin: 8px;
-    padding: 8px;
+    margin: 4px;
+    padding: 4px;
   }
 }

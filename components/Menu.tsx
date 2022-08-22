@@ -48,18 +48,20 @@ const Menu = ({
     <Modal title="Splendorific" isShowing={isOpen} hide={close}>
       <div className={styles.menu}>
         <div>Welcome!  Configure your game.</div>
-
-        <h2>Players</h2>
-        <div className={styles.description}>
-          Players can be a combaition of human players sharing a device, and computer players of varying experience levels.
-        </div>
         {players.map((player, index) => (
           <div key={index} className={styles.player}>
-            <input
-              className={styles.name}
-              value={player.name}
-              onChange={(e) => onChangeName(index, e.target.value)}
-            />
+            <h3>Player {index + 1}</h3>
+            <div className={styles.name}>
+              <input
+                value={player.name}
+                onChange={(e) => onChangeName(index, e.target.value)}
+              />
+              {index > 1 ? (
+                <button onClick={() => removePlayer(index)}>
+                  X
+                </button>
+              ) : undefined}
+            </div>
             <label>
               <input
                 type="checkbox"
@@ -82,9 +84,6 @@ const Menu = ({
                 Experienced
               </label>
             ) : undefined}
-            {index > 1 ? (
-              <button onClick={() => removePlayer(index)}>Remove Player</button>
-            ) : undefined}
           </div>
         ))}
         {players.length < 4 ? (
@@ -95,7 +94,7 @@ const Menu = ({
           newGame(players);
           close();
         }}>
-          Start
+          Start Game
         </button>
       </div>
     </Modal>
