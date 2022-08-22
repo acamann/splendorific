@@ -22,6 +22,7 @@ interface SimulationResponse {
     experience: number;
     wins: number;
     winPercentage: number;
+    averagePoints: number;
   }[];
   averageTurns?: number;
   failures?: string[];
@@ -49,32 +50,14 @@ export default function handler(
     }
 
     const wins: number[] = Array(simulationRequest.players.length).fill(0);
+    let averagePoints: number[] = Array(simulationRequest.players.length).fill(0);
     const failures: string[] = [];
     const gameLog: string[][] = [];
     const turns: number[] = [];
-    for (let i = 0; i < simulationRequest.games; i++)
+    for (let gameIndex = 0; gameIndex < simulationRequest.games; gameIndex++)
     {
       try {
-        // Should work like this... but doesn't
-        // let gameTurn = 0;
-        // let game = getRandomGame(simulationRequest.players.length);
-        // while (!game.winningPlayerIndex) {
-        //   if (game.currentPlayerIndex === 0) {
-        //     gameTurn++;
-        //   }
-
-        //   const currentPlayerExperience = simulationRequest.players[game.currentPlayerIndex].experience
-        //   game = takeTurnAI(game, currentPlayerExperience);
-        // }
-        // const winningPlayerIndex = game.winningPlayerIndex as number;
-        // const winner = game.players[winningPlayerIndex];
-        // game.log.push(`${winner.name} wins with ${winner.points} points!`);
-
-        // wins[winningPlayerIndex]++;
-        // turns.push(gameTurn);
-        // gameLog.push(game.log);
-
-        let gameTurn = 1;
+        let gameTurn = 0;
         const simulationPlayers: Player[] = simulationRequest.players.map((p, i) => {
           return {
             ...initialPlayerState,
@@ -83,28 +66,26 @@ export default function handler(
           }
         })
         let game = getRandomGame(simulationPlayers);
-        let winningPlayerIndex: number | undefined = undefined;
-        while (!winningPlayerIndex) {
-          const currentPlayerExperience = simulationRequest.players[game.currentPlayerIndex].experience
-          game = takeTurnAI(game, currentPlayerExperience);
-
+        while (game.winningPlayerIndex === undefined) {
           if (game.currentPlayerIndex === 0) {
             gameTurn++;
-            // don't start next round if there was a winner in this one
-            if (game.players.some(player => player.points >= 15)) {
-              const winner = game.players.reduce((prev, current) => (prev.points > current.points) ? prev : current);
-              winningPlayerIndex = game.players.indexOf(winner);
-              game.log.push(`${winner.name} wins with ${winner.points} points!`);
-              turns.push(gameTurn);
-              break;
-            }
           }
+
+          const currentPlayerExperience = simulationRequest.players[game.currentPlayerIndex].experience;
+          game = takeTurnAI(game, currentPlayerExperience);
         }
+        const winningPlayerIndex = game.winningPlayerIndex;
+        const winner = game.players[winningPlayerIndex];
+        game.log.push(`${winner.name} wins with ${winner.points} points!`);
+
+        averagePoints = averagePoints.map((runningAverage, playerIndex) => 
+          ((runningAverage * gameIndex) + game.players[playerIndex].points) / (gameIndex + 1));
         wins[winningPlayerIndex]++;
+        turns.push(gameTurn);
         gameLog.push(game.log);
       } catch (e: any) {
         failures.push(e.message);
-        i--;
+        gameIndex--;
       }
     }
 
@@ -113,7 +94,8 @@ export default function handler(
       players: simulationRequest.players.map((player, playerIndex) => ({
         experience: player.experience,
         wins: wins[playerIndex],
-        winPercentage: wins[playerIndex] / simulationRequest.games
+        winPercentage: wins[playerIndex] / simulationRequest.games,
+        averagePoints: averagePoints[playerIndex]
       })),
       averageTurns: turns.reduce((a, b) => a + b) / turns.length,
       failures: failures.length > 0 ? failures : undefined,
