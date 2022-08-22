@@ -50,10 +50,16 @@ const Menu = ({
         <div>Welcome!  Configure your game.</div>
 
         <h2>Players</h2>
-        <div className={styles.description}>Human players taking turns on the same device.</div>
+        <div className={styles.description}>
+          Players can be a combaition of human players sharing a device, and computer players of varying experience levels.
+        </div>
         {players.map((player, index) => (
-          <div key={index}>
-            <input value={player.name} onChange={(e) => onChangeName(index, e.target.value)} />
+          <div key={index} className={styles.player}>
+            <input
+              className={styles.name}
+              value={player.name}
+              onChange={(e) => onChangeName(index, e.target.value)}
+            />
             <label>
               <input
                 type="checkbox"
@@ -64,7 +70,7 @@ const Menu = ({
             </label>
             {player.aiExperience ? (
               <label>
-                Experience
+                Naive
                 <input
                   type="range"
                   min={0}
@@ -73,9 +79,10 @@ const Menu = ({
                   value={player.aiExperience}
                   onChange={(e) => onChangeAiExperience(index, e.currentTarget.value as unknown as number)}
                 />
+                Experienced
               </label>
             ) : undefined}
-            {players.length > 2 ? (
+            {index > 1 ? (
               <button onClick={() => removePlayer(index)}>Remove Player</button>
             ) : undefined}
           </div>
