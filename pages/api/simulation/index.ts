@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { takeTurnAI } from '../../../ai';
+import { saveSimulationToDB } from '../../../db/mongodb';
 import { getRandomGame, initialPlayerState } from '../../../gameState';
 import { Player } from '../../../models';
 
@@ -89,7 +90,7 @@ export default function handler(
       }
     }
 
-    res.status(200).json({
+    const simulationData: SimulationResponse = {
       games: simulationRequest.games,
       players: simulationRequest.players.map((player, playerIndex) => ({
         experience: player.experience,
@@ -100,7 +101,11 @@ export default function handler(
       averageTurns: turns.reduce((a, b) => a + b) / turns.length,
       failures: failures.length > 0 ? failures : undefined,
       gameLog: verbose ? gameLog : undefined
-    });
+    }
+
+    saveSimulationToDB(simulationData);
+
+    res.status(200).json(simulationData);
   } else {
     res.status(405).end();
   }
