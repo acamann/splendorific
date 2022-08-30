@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { version } from './../package.json';
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
 const database = "Splendorific";
@@ -15,5 +16,6 @@ const saveDocument = async (collection: string, document: {}) => {
 export const saveSimulationToDB = async (simulationData: {}) =>
   await saveDocument("Simulations", {
     ...simulationData,
-    timestamp: new Date().getTime()
+    timestamp: new Date().getTime(),
+    version
   });
