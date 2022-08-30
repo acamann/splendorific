@@ -34,7 +34,7 @@ interface ErrorResponse {
   error: string;
 }
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SimulationResponse | ErrorResponse>
 ) {
@@ -103,7 +103,7 @@ export default function handler(
       gameLog: verbose ? gameLog : undefined
     }
 
-    saveSimulationToDB(simulationData);
+    await saveSimulationToDB(simulationData);
 
     res.status(200).json(simulationData);
   } else {
