@@ -20,6 +20,7 @@ import WinModal from '../components/WinModal'
 import { canPlayerAffordCard, getTotalChipCount } from '../gameState/helpers'
 import { GameState, getRandomGame, initialPlayerState, initialState, takeTurnPurchaseCard, takeTurnPurchaseReservedCard, takeTurnReserveCard, takeTurnTakeChips } from '../gameState'
 import { takeTurnAI } from '../ai'
+import { byColor } from '../utils/sort'
 
 const Home: NextPage = () => {
   const [showMenu, setShowMenu] = useState<boolean>(true);
@@ -240,7 +241,7 @@ const Home: NextPage = () => {
                   </div>
 
                   <div className={styles.cards}>
-                    {player.cards.map((card, i) => (
+                    {player.cards.sort(byColor).map((card, i) => (
                       <div key={i} className={styles.stacking}>
                         <Card
                           card={card}
@@ -288,4 +289,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default Home;
