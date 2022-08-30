@@ -88,18 +88,6 @@ export const getBestChipsToPursueCard = (player: Player, availableChips: Bank, d
 
   // for now, only pursue a single move into the future
   return undefined;
-
-  // if (gemsMoreThanTwoNeeded.length > 0) {
-  //   // can't get it on next turn, because more than 3 different gems still needed
-  //   // hypothetically get any 3 of them with greatest length remaining
-  //   return undefined;
-  // }
-
-  // if (gemsTwoNeeded.length > 1) {
-  //   // can't purchase on next turn, because more than 1 gem with more than 1 gem required
-  //   // hypothetically get 2 of them if can, or any 3 remaining
-  //   return undefined;
-  // }
 }
 
 export const getNumberOfTurnsUntilPlayerCanAffordCard = (player: Player, availableChips: Bank, card: Card): 0 | 1 | undefined => {
@@ -112,14 +100,14 @@ export const getNumberOfTurnsUntilPlayerCanAffordCard = (player: Player, availab
   const gemsMoreThanTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count > 2).map(([gem, count]) => gem as unknown as Gem);
   if (gemsMoreThanTwoNeeded.length > 0) {
     // can't get it on next turn, because more than 3 different gems still needed
-    // hypothetically get any 3 of them with greatest length remaining
+    // TODO: hypothetical good move: get any 3 of them with greatest length remaining
     return undefined;
   }
 
   const gemsTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 2).map(([gem, count]) => gem as unknown as Gem);
   if (gemsTwoNeeded.length > 1) {
     // can't purchase on next turn, because more than 1 gem with more than 1 gem required
-    // hypothetically get 2 of them if can, or any 3 remaining
+    // TODO: hypothetical good move: get 2 of them if can, or any 3 remaining
     return undefined;
   }
 
