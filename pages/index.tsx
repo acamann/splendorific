@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Card from '../components/Card'
 import CardPlaceholder from '../components/CardPlaceholder'
 import Chip from '../components/Chip'
@@ -40,6 +40,21 @@ const Home: NextPage = () => {
 
   const isComputersTurn = useMemo(() => game.players[game.currentPlayerIndex]?.aiExperience !== undefined, [game.currentPlayerIndex, game.players]);
   const isGameOver = useMemo(() => game.winningPlayerIndex !== undefined, [game.winningPlayerIndex]);
+
+  useEffect(() => {
+    if (isGameOver) {
+      fetch("/api/database/games", {
+        method: "POST",
+        body: JSON.stringify(game),
+        headers: 
+        {
+          "Content-Type": 
+          "application/json",
+        },
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGameOver]);
 
   const purchaseCard = (card: CardType): void => {
     if (isComputersTurn) {

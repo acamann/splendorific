@@ -19,3 +19,10 @@ export const saveSimulationToDB = async (simulationData: {}) =>
     timestamp: new Date().getTime(),
     version
   });
+
+export const saveGameToDB = async (gameData: {}) =>
+  await saveDocument("Games", {
+    ...gameData,
+    timestamp: new Date().getTime(),
+    version
+  });

@@ -26,6 +26,7 @@ export type GameState = {
   players: Player[];
   currentPlayerIndex: number;
   winningPlayerIndex?: number;
+  verboseLog: string[];
   log: string[];
   error?: string;
 }
@@ -40,6 +41,7 @@ export const initialState: GameState = {
   nobles: [],
   players: [],
   currentPlayerIndex: 0,
+  verboseLog: [],
   log: [],
 }
 
@@ -94,6 +96,7 @@ export const takeTurnPurchaseCard = (game: GameState, cardToPurchase: Card): Gam
   // update banks
   const newBank = { ...game.bank };
   const playerBank = { ...game.players[game.currentPlayerIndex].bank };
+  const spent: Gem[] = [];
   let playerCardValues = getBankValueOfCards([...game.players[game.currentPlayerIndex].cards]);
   for (const gem of cardToPurchase.cost) {
     if (playerCardValues[gem] > 0) {
@@ -101,9 +104,11 @@ export const takeTurnPurchaseCard = (game: GameState, cardToPurchase: Card): Gam
     } else if (playerBank[gem] > 0) {
       playerBank[gem]--;
       newBank[gem]++;
+      spent.push(gem);
     } else if (playerBank[Gem.Gold] > 0) {
       playerBank[Gem.Gold]--;
       newBank[Gem.Gold]++;
+      spent.push(Gem.Gold);
     } else {
       throw new Error("Error: unexpected path in card purchase");
     }
@@ -154,7 +159,8 @@ export const takeTurnPurchaseCard = (game: GameState, cardToPurchase: Card): Gam
     bank: newBank,
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
-    log: [...game.log, `${game.players[game.currentPlayerIndex].name} purchased card: (${cardToString(cardToPurchase)}). Total points: ${playerPoints}`]
+    verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} purchased card: (${cardToString(cardToPurchase)}). Total points: ${playerPoints}`],
+    log: [...game.log, `${game.currentPlayerIndex}p${cardToPurchase.level}.${cardToPurchase.id}${spent.map(g => getGemName(g).charAt(0)).join("")}+${cardToPurchase.points}${earnedNobles.map(n => `n${n.id}+${n.points}`)}|${playerPoints}`]
   }
 
   return {
@@ -181,7 +187,8 @@ export const takeTurnTakeChips = (game: GameState, chipsToTake: Gem[]) => {
       bank: playerBank
     }) : player),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
-    log: [...game.log, `${game.players[game.currentPlayerIndex].name} took chips: ${chipsToTake.map(c => getGemName(c)).join(", ")}.`]
+    verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} took chips: ${chipsToTake.map(c => getGemName(c)).join(", ")}.`],
+    log: [...game.log, `${game.currentPlayerIndex}g${chipsToTake.map(c => getGemName(c).charAt(0)).join("")}`]
   };
 
   return {
@@ -227,7 +234,8 @@ export const takeTurnReserveCard = (game: GameState, cardToReserve: Card) => {
       [Gem.Gold]: isGoldAvailable ? game.bank[Gem.Gold] - 1 : game.bank[Gem.Gold]
     },
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
-    log: [...game.log, `${game.players[game.currentPlayerIndex].name} reserved card: (${cardToString(cardToReserve)}).`]
+    verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} reserved card: (${cardToString(cardToReserve)}).`],
+    log: [...game.log, `${game.currentPlayerIndex}r${cardToReserve.level}.${cardToReserve.id}${isGoldAvailable ? "g" : ""}`]
   }
 
   return {
@@ -245,6 +253,7 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
   // update banks
   const newBank = { ...game.bank };
   const playerBank = { ...game.players[game.currentPlayerIndex].bank };
+  const spent: Gem[] = [];
   let playerCardValues = getBankValueOfCards([...game.players[game.currentPlayerIndex].cards]);
   for (const gem of reservedCardToPurchase.cost) {
     if (playerCardValues[gem] > 0) {
@@ -252,9 +261,11 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
     } else if (playerBank[gem] > 0) {
       playerBank[gem]--;
       newBank[gem]++;
+      spent.push(gem);
     } else if (playerBank[Gem.Gold] > 0) {
       playerBank[Gem.Gold]--;
       newBank[Gem.Gold]++;
+      spent.push(Gem.Gold);
     } else {
       throw new Error("Error: unexpected path in random card purchase");
     }
@@ -287,7 +298,8 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
     bank: newBank,
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
-    log: [...game.log, `${game.players[game.currentPlayerIndex].name} purchased reserved card: (${cardToString(reservedCardToPurchase)}). Total points: ${playerPoints}`]
+    verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} purchased reserved card: (${cardToString(reservedCardToPurchase)}). Total points: ${playerPoints}`],
+    log: [...game.log, `${game.currentPlayerIndex}pr${reservedCardToPurchase.level}.${reservedCardToPurchase.id}${spent.map(g => getGemName(g).charAt(0)).join("")}+${reservedCardToPurchase.points}${earnedNobles.map(n => `n${n.id}+${n.points}`)}(|${playerPoints}`]
   }
 
   return {
