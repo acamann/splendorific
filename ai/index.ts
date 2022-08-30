@@ -1,4 +1,5 @@
 import {
+  Bank,
   Card,
   Gem,
   NonGoldGem
@@ -16,6 +17,8 @@ import {
   getAffordableCards,
   getAffordableReservedCards,
   getBankValueOfCards,
+  getBestChipsToPursueCard,
+  getNumberOfTurnsUntilPlayerCanAffordCard,
   getTotalChipCount,
   getVisibleCards
 } from "../gameState/helpers";
@@ -74,29 +77,23 @@ const takeRandomTurn = (game: GameState): GameState => {
 }
 
 const takeWiseTurn = (game: GameState): GameState => {
+  const currentPlayerCards = getBankValueOfCards(game.players[game.currentPlayerIndex].cards);
 
-  // calculate desirability for every visible card:
-  // points * 20
-  // can afford now? minus 0 & keep in list
-  // TODO: can afford next turn? minus 10 & keep in list
-  // else? ignore card
-  // subtract number of chips required to spend from player bank
-
-  // can purchase now + 5 points = 100 minus number of chips required
-  // can purchase next turn + 5 points = 90 minus number of chips required
-  // can purchase now + 4 points = 80
-  // can purchase next turn + 4 points = 70
-  // can purchase now + 3 points = 60
-  // can purchase next turn + 3 points = 50
-  // can purchase now + 2 points = 40
-  // can purchase next turn + 2 points = 30
-  // can purchase now + 1 point = 20
-  // can purchase next turn + 1 point = 10
+  const numberOfEachCardNeededToEarnEachNoble: Bank[] = game.nobles.map(n => {
+    return {
+      [Gem.Onyx]: n.black - currentPlayerCards[Gem.Onyx],
+      [Gem.Diamond]: n.white - currentPlayerCards[Gem.Diamond],
+      [Gem.Emerald]: n.green - currentPlayerCards[Gem.Emerald],
+      [Gem.Ruby]: n.red - currentPlayerCards[Gem.Ruby],
+      [Gem.Sapphire]: n.blue - currentPlayerCards[Gem.Onyx],
+      [Gem.Gold]: 0,
+    }
+  })
 
   const desiredCards = (getVisibleCards(game.decks).map(card => {
-    const canAfford = canPlayerAffordCard(game.players[game.currentPlayerIndex], card);
-    // TODO: consider cards that could be purchased on NEXT turn
-    if (canAfford) {
+    // currently able to see current and next turn only
+    const numberOfTurnsUntilCanAfford = getNumberOfTurnsUntilPlayerCanAffordCard(game.players[game.currentPlayerIndex], game.bank, card);
+    if (numberOfTurnsUntilCanAfford !== undefined) {
       const playerCurrentCardsValue = getBankValueOfCards(game.players[game.currentPlayerIndex].cards);
       let chipsRequiredFromPlayerBank = 0;
       card.cost.forEach(gem => {
@@ -108,9 +105,20 @@ const takeWiseTurn = (game: GameState): GameState => {
           chipsRequiredFromPlayerBank++;
         }
       });
+
+      // add some value if this card gets you closer to a noble (depending on how close you are already)
+      let nobleValue = 0;
+      const noblesThatNeedThisCard = numberOfEachCardNeededToEarnEachNoble.filter(noble => noble[card.gem] > 0);
+      for (const noble of noblesThatNeedThisCard) {
+        let totalCardsNeeded = Object.values(noble).reduce((total, current) => total + current, 0);
+        if (totalCardsNeeded < 5) {
+          nobleValue = nobleValue + (10 * (5 - totalCardsNeeded));
+        }
+      }
+
       return {
         card,
-        desirability: card.points * 20 - chipsRequiredFromPlayerBank
+        desirability: card.points * 20 + nobleValue - (chipsRequiredFromPlayerBank * 5) - (numberOfTurnsUntilCanAfford * 10)
       }
     } else {
       return undefined;
@@ -120,13 +128,17 @@ const takeWiseTurn = (game: GameState): GameState => {
 
   for (let index = 0; index < desiredCards.length; index++) {
     const desiredCard = desiredCards[index].card;
-    //  - purchase desired card (if able)
+    //  - purchase most desired card (if able)
     if (canPlayerAffordCard(game.players[game.currentPlayerIndex], desiredCard)) {
       return takeTurnPurchaseCard(game, desiredCard);
     }
     //  - take other affordable card, if with it could purchase desired card (if able)
     //  - take available chips to get closer to desired card (if able)
-    //  - reserve (if able)
+    const availableChipsToTakeToPursueCard = getBestChipsToPursueCard(game.players[game.currentPlayerIndex], game.bank, desiredCard)
+    if (availableChipsToTakeToPursueCard) {
+      return takeTurnTakeChips(game, availableChipsToTakeToPursueCard);
+    }
+    //  - reserve (if able, and only if really close to getting)
   }
 
   // otherwise take random turn

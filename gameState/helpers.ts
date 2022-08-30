@@ -1,5 +1,5 @@
 import { GameState } from ".";
-import { ALL_GEMS, Bank, Card, Decks, Gem, Noble, Player } from "../models";
+import { ALL_GEMS, Bank, Card, Decks, Gem, Noble, NonGoldGem, Player } from "../models";
 
 export const getEmptyBank = () => ({
   [Gem.Diamond]: 0,
@@ -40,6 +40,97 @@ export const getNextPlayerIndex = (currentPlayerIndex: number, numberOfPlayers: 
 export const canPlayerAffordCard = (player: Player, card: Card) => 
   doesBankHaveGems(card.cost, getPurchasingPower(player), true);
 
+const getRemainingCost = (purchasingPower: Bank, cardCost: Bank): Bank => {
+  const bank = getEmptyBank();
+  for (const gem of ALL_GEMS) {
+    bank[gem] = cardCost[gem] - purchasingPower[gem];
+  }
+  return bank;
+}
+
+export const getBestChipsToPursueCard = (player: Player, availableChips: Bank, desiredCard: Card): Gem[] | undefined => {
+  const remainingCost = getRemainingCost(getPurchasingPower(player), getCostAsBank(desiredCard.cost));
+
+  const gemsMoreThanTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count > 2).map(([gem, count]) => gem as unknown as Gem);
+  const gemsTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 2).map(([gem, count]) => gem as unknown as Gem);
+  const gemsOneNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 1).map(([gem, count]) => gem as unknown as Gem);
+
+  if (gemsTwoNeeded.length === 1 && gemsOneNeeded.length === 0 && gemsMoreThanTwoNeeded.length === 0) {
+    // only one type of gem needed, and only 2 of them needed
+    const gemNeeded = gemsTwoNeeded[0];
+    // so if bank has more 4 or more of that gem, we can take 2 and purchase on next turn!
+    if (availableChips[gemNeeded] >= 4) {
+      return [gemsTwoNeeded[0], gemsTwoNeeded[0]];
+    }
+  }
+
+  if (gemsOneNeeded.length <= 3 && gemsMoreThanTwoNeeded.length === 0 && gemsTwoNeeded.length === 0) {
+    // 3 or fewer gems needed, and only one of each needed
+    for (const gemNeeded of gemsOneNeeded) {
+      if (availableChips[gemNeeded] === 0) {
+        // a needed gem is not available
+        return undefined;
+      }
+    }
+    // so if bank has one or more of each of those, we can take them and purchase on next turn!
+    const gemsToTake = [...gemsOneNeeded];
+    for (const gem of ALL_GEMS) {
+      if (gemsToTake.length === 3) {
+        return gemsToTake;
+      }
+      if (gem != Gem.Gold && availableChips[gem] > 0 && !gemsToTake.includes(gem)) {
+        // still need more gems to take 3
+        gemsToTake.push(gem);
+      }
+    }
+    return undefined; // couldn't get any more 
+  }
+
+  // for now, only pursue a single move into the future
+  return undefined;
+}
+
+export const getNumberOfTurnsUntilPlayerCanAffordCard = (player: Player, availableChips: Bank, card: Card): 0 | 1 | undefined => {
+  let ongoingPurchasingPower = getPurchasingPower(player);
+  if (doesBankHaveGems(card.cost, ongoingPurchasingPower, true)) {
+    return 0;
+  }
+
+  const remainingCost = getRemainingCost(ongoingPurchasingPower, getCostAsBank(card.cost));
+  const gemsMoreThanTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count > 2).map(([gem, count]) => gem as unknown as Gem);
+  if (gemsMoreThanTwoNeeded.length > 0) {
+    // can't get it on next turn, because more than 3 different gems still needed
+    // TODO: hypothetical good move: get any 3 of them with greatest length remaining
+    return undefined;
+  }
+
+  const gemsTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 2).map(([gem, count]) => gem as unknown as Gem);
+  if (gemsTwoNeeded.length > 1) {
+    // can't purchase on next turn, because more than 1 gem with more than 1 gem required
+    // TODO: hypothetical good move: get 2 of them if can, or any 3 remaining
+    return undefined;
+  }
+
+  const gemsOneNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 1).map(([gem, count]) => gem as unknown as Gem);
+  if (gemsTwoNeeded.length === 1 && gemsOneNeeded.length === 0 && gemsMoreThanTwoNeeded.length === 0) {
+    // only one type of gem needed, and only 2 of them needed
+    const gemNeeded = gemsTwoNeeded[0];
+    // so if bank has more 4 or more of that gem, we can take 2 and purchase on next turn!
+    return availableChips[gemNeeded] >= 4 ? 1 : undefined;
+  }
+
+  if (gemsOneNeeded.length <= 3 && gemsMoreThanTwoNeeded.length === 0 && gemsTwoNeeded.length === 0) {
+    // 3 or fewer gems needed, and only one of each needed
+    for (const gemNeeded of gemsOneNeeded) {
+      if (availableChips[gemNeeded] === 0) {
+        return undefined;
+      }
+    }
+    // so if bank has one or more of each of those, we can take them and purchase on next turn!
+    return 1;
+  }
+}
+
 export const getVisibleCards = (decks: Decks, level?: 1 | 2 | 3): Card[] => {
   const cards = [...decks[3].slice(0, 4), ...decks[2].slice(0, 4), ...decks[1].slice(0, 4)]
     .filter(c => level === undefined || c.level === level);
@@ -59,6 +150,15 @@ export const getAffordableReservedCards = (game: GameState, playerIndex: number)
 export const getBankValueOfCards = (cards: Card[]): Bank => {
   const bank = getEmptyBank();
   for (const gem of cards.map(card => card.gem)) {
+    bank[gem]++;
+  }
+  return bank;
+}
+
+export const getCostAsBank = (cost: NonGoldGem[]): Bank => {
+  const bank = getEmptyBank();
+  for (const gem of cost)
+  {
     bank[gem]++;
   }
   return bank;

@@ -24,6 +24,7 @@ interface SimulationResponse {
     wins: number;
     winPercentage: number;
     averagePoints: number;
+    averageNobles: number;
   }[];
   averageTurns?: number;
   failures?: string[];
@@ -52,6 +53,7 @@ export default async function handler(
 
     const wins: number[] = Array(simulationRequest.players.length).fill(0);
     let averagePoints: number[] = Array(simulationRequest.players.length).fill(0);
+    let averageNobles: number[] = Array(simulationRequest.players.length).fill(0);
     const failures: string[] = [];
     const gameLog: string[][] = [];
     const turns: number[] = [];
@@ -81,6 +83,9 @@ export default async function handler(
 
         averagePoints = averagePoints.map((runningAverage, playerIndex) => 
           ((runningAverage * gameIndex) + game.players[playerIndex].points) / (gameIndex + 1));
+        averageNobles = averageNobles.map((runningAverage, playerIndex) => 
+          ((runningAverage * gameIndex) + game.players[playerIndex].nobles.length) / (gameIndex + 1));
+
         wins[winningPlayerIndex]++;
         turns.push(gameTurn);
         gameLog.push(game.log);
@@ -96,7 +101,8 @@ export default async function handler(
         experience: player.experience,
         wins: wins[playerIndex],
         winPercentage: wins[playerIndex] / simulationRequest.games,
-        averagePoints: averagePoints[playerIndex]
+        averagePoints: averagePoints[playerIndex],
+        averageNobles: averageNobles[playerIndex]
       })),
       averageTurns: turns.reduce((a, b) => a + b) / turns.length,
       failures: failures.length > 0 ? failures : undefined,
