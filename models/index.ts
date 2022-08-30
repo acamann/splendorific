@@ -29,6 +29,7 @@ export type Bank = { [gem in Gem]: number }
 export type Level = 1 | 2 | 3;
 
 export type Card = {
+  id: number,
   level: Level,
   gem: NonGoldGem,
   points: 0 | 1 | 2 | 3 | 4 | 5,
@@ -43,6 +44,7 @@ export type Decks = {
 }
 
 export type Noble = {
+  id: number,
   points: 3,
   black: number,
   blue: number,

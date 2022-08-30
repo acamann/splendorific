@@ -15,7 +15,8 @@ const getGemFromColor = (color: CardColor): NonGoldGem => {
   }
 }
 
-export const deck: Card[] = cards.map(card => ({
+export const deck: Card[] = cards.map((card, index) => ({
+  id: index,
   level: card.Level as 1 | 2 | 3,
   gem: getGemFromColor(card.Color as CardColor),
   points: card.PV as 1 | 2 | 3 | 4 | 5,

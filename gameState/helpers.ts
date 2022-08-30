@@ -51,9 +51,9 @@ const getRemainingCost = (purchasingPower: Bank, cardCost: Bank): Bank => {
 export const getBestChipsToPursueCard = (player: Player, availableChips: Bank, desiredCard: Card): Gem[] | undefined => {
   const remainingCost = getRemainingCost(getPurchasingPower(player), getCostAsBank(desiredCard.cost));
 
-  const gemsMoreThanTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count > 2).map(([gem, count]) => gem as unknown as Gem);
-  const gemsTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 2).map(([gem, count]) => gem as unknown as Gem);
-  const gemsOneNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 1).map(([gem, count]) => gem as unknown as Gem);
+  const gemsMoreThanTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count > 2).map(([gem, count]) => parseInt(gem) as Gem);
+  const gemsTwoNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 2).map(([gem, count]) => parseInt(gem) as Gem);
+  const gemsOneNeeded = Object.entries(remainingCost).filter(([gem, count]) => count === 1).map(([gem, count]) => parseInt(gem) as Gem);
 
   if (gemsTwoNeeded.length === 1 && gemsOneNeeded.length === 0 && gemsMoreThanTwoNeeded.length === 0) {
     // only one type of gem needed, and only 2 of them needed
