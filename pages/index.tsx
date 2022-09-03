@@ -230,24 +230,27 @@ const Home: NextPage = () => {
                   ) : undefined}
 
                   <div className={styles.bank}>
-                    {ALL_GEMS.map(gem => player.bank[gem] > 0 ? (
-                      <Chip
-                        key={gem}
-                        gem={gem}
-                        size={40}
-                        count={player.bank[gem]}
-                      />
-                    ) : undefined)}
-                  </div>
-
-                  <div className={styles.cards}>
-                    {player.cards.sort(byColor).map((card, i) => (
-                      <div key={i} className={styles.stacking}>
-                        <Card
-                          card={card}
-                          width={70}
-                          hideCost
-                        />
+                    {ALL_GEMS.filter(gem => player.bank[gem] > 0 || player.cards.some(c => c.gem === gem)).map(gem => (
+                      <div className={styles.gemColumn} key={gem}>
+                        {player.bank[gem] > 0 ? (
+                          <div className={styles.chips}>
+                            <Chip
+                              key={gem}
+                              gem={gem}
+                              size={40}
+                              count={player.bank[gem]}
+                            />
+                          </div>
+                        ) : undefined}
+                        {player.cards.filter(c => c.gem === gem).sort((a, b) => a.points - b.points).map((card, i) => 
+                          <div key={i} className={styles.stacking}>
+                            <Card
+                              card={card}
+                              width={70}
+                              hideCost
+                            />
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

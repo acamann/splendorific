@@ -49,7 +49,7 @@
   flex-direction: column;
   gap: 8px;
   margin-right: 10px;
-  max-width: 435px;
+  max-width: 500px;
 
   .player {
     background-color:rgba(255, 255, 255, 0.5);;
@@ -63,6 +63,7 @@
     .playerContent {
       display: flex;
       justify-content: space-between;
+      align-items: flex-end;
       gap: 8px;
 
       .left, .right {
@@ -72,8 +73,14 @@
         gap: 8px;
       }
 
+      .left {
+        align-items: flex-start;
+      }
+
       .right {
         align-items: flex-end;
+        justify-content: flex-start;
+        margin-bottom: 8px;
       }
     }
 
@@ -90,10 +97,11 @@
     .draftGems {
       display: flex;
       gap: 5px;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 8px;
+      border-radius: 8px;
       border: solid 1px goldenrod;
       align-items: center;
+      margin-bottom: 10px;
     }
 
     .bank {
@@ -121,15 +129,22 @@
       }
     }
 
-    .cards {
+    .gemColumn {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
       gap: 4px;
       margin: 0;
+
+      .chips {
+        z-index: 100;
+      }
 
       .stacking {
         height: 30px;
         overflow-y: hidden;
+        margin-top: -10px;
       }
     }
   }
