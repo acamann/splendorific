@@ -11,6 +11,7 @@ import {
   Player
 } from "../models";
 import { shuffle } from "../utils/array";
+import { encodeInitialDecks } from "./encoding";
 import {
   getBankValueOfCards,
   getEmptyBank,
@@ -76,17 +77,21 @@ export const getRandomGame = (players: Player[]): GameState => {
     [Gem.Gold]: 7, // leave the gold chips alone
   }
 
+  const nobles = nobleDeck.slice(0, noblesCount);
+  const decks = {
+    [1]: deck.filter(card => card.level === 1),
+    [2]: deck.filter(card => card.level === 2),
+    [3]: deck.filter(card => card.level === 3)
+  };
+
   return {
     ...initialState,
     players,
     bank,
-    nobles: nobleDeck.slice(0, noblesCount),
-    decks: {
-      [1]: deck.filter(card => card.level === 1),
-      [2]: deck.filter(card => card.level === 2),
-      [3]: deck.filter(card => card.level === 3)
-    },
-    currentPlayerIndex: 0
+    nobles,
+    decks,
+    currentPlayerIndex: 0,
+    log: [encodeInitialDecks(decks, nobles)]
   }
 };
 
