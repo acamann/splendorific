@@ -5,3 +5,5 @@ export const encodeInitialDecks = (decks: Decks, nobles: Noble[]): string => {
   const encodedNobles = `n:${nobles.map(n => n.id).join(",")}`;
   return `${encodedDecks}|${encodedNobles}`;
 }
+
+// TODO: relocate other encoding logic here (from log additions in gamestate)
