@@ -39,7 +39,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SimulationResponse | ErrorResponse>
 ) {
-  if (req.method === 'POST') {
+  if (req.method === "OPTIONS") {
+    res.setHeader("Allow", "POST");
+    return res.status(202).json({});
+  } else if (req.method === 'POST') {
     const verbose = req.query["verbose"] === "true";
 
     // for now run the simulation & wait on the result before responding
