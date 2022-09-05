@@ -48,10 +48,10 @@ export default async function handler(
     // for now run the simulation & wait on the result before responding
     const simulationRequest: SimulationRequest = req.body;
     if (!simulationRequest.games || simulationRequest.games <= 0) {
-      res.status(400).json({ error: "'games': positive number of games required in request body" });
+      return res.status(400).json({ error: "'games': positive number of games required in request body" });
     }
     if (!simulationRequest.players) {
-      res.status(400).json({ error: "'players': player configuration required for 2 to 4 players in request body" });
+      return res.status(400).json({ error: "'players': player configuration required for 2 to 4 players in request body" });
     }
 
     const wins: number[] = Array(simulationRequest.players.length).fill(0);
@@ -114,8 +114,8 @@ export default async function handler(
 
     await saveSimulationToDB(simulationData);
 
-    res.status(200).json(simulationData);
+    return res.status(200).json(simulationData);
   } else {
-    res.status(405).end();
+    return res.status(405).end();
   }
 }
