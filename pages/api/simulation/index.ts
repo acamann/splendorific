@@ -37,7 +37,7 @@ interface ErrorResponse {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SimulationResponse | ErrorResponse>
+  res: NextApiResponse<SimulationResponse | ErrorResponse | {}>
 ) {
   if (req.method === "OPTIONS") {
     res.setHeader("Allow", "POST");
