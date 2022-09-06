@@ -9,7 +9,8 @@
 }
 
 .shuffle {
-  position: absolute;
+  position: fixed;
+  z-index: 99;
   top: 4px;
   right: 4px;
   display: flex;
@@ -152,11 +153,10 @@
 
 @media (max-width: 480px) {
   .main {
+    flex-direction: column;
     padding: 0;
-  }
-
-  .main {
     align-items: flex-start;
+    justify-content: center;
   }
 
   .nobles, .board { gap: 10px; padding-right: 10px; }
