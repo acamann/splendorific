@@ -304,7 +304,7 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
     verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} purchased reserved card: (${cardToString(reservedCardToPurchase)}). Total points: ${playerPoints}`],
-    log: [...game.log, `${game.currentPlayerIndex}pr${reservedCardToPurchase.level}.${reservedCardToPurchase.id}${spent.map(g => getGemName(g).charAt(0)).join("")}+${reservedCardToPurchase.points}${earnedNobles.map(n => `n${n.id}+${n.points}`)}(|${playerPoints}`]
+    log: [...game.log, `${game.currentPlayerIndex}pr${reservedCardToPurchase.level}.${reservedCardToPurchase.id}${spent.map(g => getGemName(g).charAt(0)).join("")}+${reservedCardToPurchase.points}${earnedNobles.map(n => `n${n.id}+${n.points}`)}|${playerPoints}`]
   }
 
   return {
