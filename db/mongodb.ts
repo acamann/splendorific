@@ -29,7 +29,7 @@ export const saveSimulationToDB = async (simulation: {}) =>
 
 
 export const saveSimulationsToDB = async (simulations: {}[]) =>
-  await saveDocuments("Simulations", simulations.map(data => {
+  await saveDocuments("TEST Simulations", simulations.map(data => {
     return {
       ...data,
       timestamp: new Date().getTime(),
