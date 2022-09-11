@@ -19,7 +19,7 @@ export const handler: Handler = schedule(SCHEDULE, async (event, context) => {
 
   // run & save simulation result to db
   const simulation = simulate(request.games, request.players.map(p => p.aiExperience));
-  const id = saveSimulationToDB(simulation);
+  const id = await saveSimulationToDB(simulation);
   return {
     statusCode: 200,
     body: JSON.stringify({
