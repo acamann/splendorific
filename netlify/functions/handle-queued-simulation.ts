@@ -1,12 +1,10 @@
-import { Handler, schedule } from "@netlify/functions";
+import { Handler } from "@netlify/functions";
 import { takeTurnAI } from "../../ai";
 import { saveSimulationToDB, tryDequeueSimulationRequest } from "../../db/mongodb";
 import { getRandomGame, initialPlayerState } from "../../gameState";
 import { Player } from "../../models";
 
-const SCHEDULE = "*/5 * * * *"; // every 5 minutes
-
-export const handler: Handler = schedule(SCHEDULE, async (event, context) => {
+export const handler: Handler = async (event, context) => {
   // get and remove next request from db queue
   const request = await tryDequeueSimulationRequest();
   if (!request) {
@@ -27,7 +25,7 @@ export const handler: Handler = schedule(SCHEDULE, async (event, context) => {
       id
     })
   }
-});
+};
 
 interface SimulationResponse {
   games: number;
