@@ -1,32 +1,33 @@
-import { Handler } from "@netlify/functions";
+import { Handler, schedule } from "@netlify/functions";
 import { takeTurnAI } from "../../ai";
-import { saveSimulationsToDB } from "../../db/mongodb";
+import { saveSimulationToDB, tryDequeueSimulationRequest } from "../../db/mongodb";
 import { getRandomGame, initialPlayerState } from "../../gameState";
 import { Player } from "../../models";
 
-const NUMBER_OF_GAMES = 100;
-const PLAYER_EXPERIENCE_BASELINES = [
-  [1, 0],
-  [0, 1, 0],
-  [1, 0, 0, 0],
-  [0, 0, 0, 1],
-  [1, 1],
-  [0, 0],
-  [1, 1, 1],
-  [0, 0, 0],
-  [1, 1, 1, 1],
-  [0, 0, 0, 0],
-  [0.5, 0.5],
-  [0.5, 0.5, 0.5],
-  [0.5, 0.5, 0.5, 0.5],
-  [0.25, 0.75],
-  [1, 1, 0],
-  [1, 1, 0, 0],
-  [1, 1, 1, 0],
-  [1, 0.5, 0.5, 0],
-  [1, 0.5, 0, 0],
-  [1, 0.75, 0.5, 0.25]
-];
+const SCHEDULE = "*/5 * * * *"; // every 5 minutes
+
+export const handler: Handler = schedule(SCHEDULE, async (event, context) => {
+  // get and remove next request from db queue
+  const request = await tryDequeueSimulationRequest();
+  if (!request) {
+    // if there is not one, return
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "No Simulation Requests Queued" })
+    }
+  }
+
+  // run & save simulation result to db
+  const simulation = simulate(request.games, request.players.map(p => p.aiExperience));
+  const id = saveSimulationToDB(simulation);
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "Successful simulation",
+      id
+    })
+  }
+});
 
 interface SimulationResponse {
   games: number;
@@ -41,17 +42,6 @@ interface SimulationResponse {
   failures?: string[];
   gameLog?: string[][];
 }
-
-export const handler: Handler = (event, context) => {
-  if (event.httpMethod === "POST") {
-    (async () => {
-      await saveSimulationsToDB(PLAYER_EXPERIENCE_BASELINES.map((playerExperiences, i) => {
-        console.log(`Simulate ${i + 1}`);
-        return simulate(NUMBER_OF_GAMES, playerExperiences)
-      }));
-    })();
-  }
-};
 
 const simulate = (numberOfGames: number, playerExperiences: number[]): SimulationResponse => {
   const numberOfPlayers = playerExperiences.length;

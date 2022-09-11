@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, WithId } from 'mongodb';
 import { version } from './../package.json';
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
@@ -20,6 +20,17 @@ const saveDocuments = async (collection: string, documents: {}[]) => {
   await client.close();
 }
 
+const dequeue = async <T>(collection: string): Promise<WithId<T> | undefined> => {
+  await client.connect();
+  const collectionClient = client.db(database).collection(collection);
+  const foundItem = await collectionClient.findOne<WithId<T>>() ?? undefined;
+  if (foundItem) {
+    await collectionClient.deleteOne(foundItem["_id"]);
+  }
+  await client.close();
+  return foundItem;
+}
+
 export const saveSimulationToDB = async (simulation: {}) =>
   await saveDocument("Simulations", {
     ...simulation,
@@ -27,19 +38,19 @@ export const saveSimulationToDB = async (simulation: {}) =>
     version
   });
 
-
-export const saveSimulationsToDB = async (simulations: {}[]) =>
-  await saveDocuments("TEST Simulations", simulations.map(data => {
-    return {
-      ...data,
-      timestamp: new Date().getTime(),
-      version
-    }
-  }));
-
 export const saveGameToDB = async (gameData: {}) =>
   await saveDocument("Games", {
     ...gameData,
     timestamp: new Date().getTime(),
     version
   });
+
+type PlayerConfiguration = { aiExperience: number };
+type SimulationRequest = { games: number, players: PlayerConfiguration[] }
+
+export const queueSimulations = async (requests: SimulationRequest[]) =>
+  await saveDocuments("Simulation Queue", requests);
+
+export const tryDequeueSimulationRequest = async (): Promise<SimulationRequest | undefined> => {
+  return await dequeue<SimulationRequest>("Simulation Queue");
+}
