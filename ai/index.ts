@@ -92,6 +92,7 @@ const takeWiseTurn = (game: GameState): GameState => {
 
   const desiredCards: { card: Card, desirability: number }[] = [];
   for (const card of getVisibleCards(game.decks)) {
+    // currently able to see current and next turn only
     const numberOfTurnsUntilCanAfford = getNumberOfTurnsUntilPlayerCanAffordCard(game.players[game.currentPlayerIndex], game.bank, card);
     if (numberOfTurnsUntilCanAfford !== undefined) {
       const playerCurrentCardsValue = getBankValueOfCards(game.players[game.currentPlayerIndex].cards);
