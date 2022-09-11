@@ -25,7 +25,7 @@ const dequeue = async <T>(collection: string): Promise<WithId<T> | undefined> =>
   const collectionClient = client.db(database).collection(collection);
   const foundItem = await collectionClient.findOne<WithId<T>>() ?? undefined;
   if (foundItem) {
-    await collectionClient.deleteOne(foundItem["_id"]);
+    await collectionClient.deleteOne({ _id: foundItem._id });
   }
   await client.close();
   return foundItem;
