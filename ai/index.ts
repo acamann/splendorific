@@ -88,9 +88,10 @@ const takeWiseTurn = (game: GameState): GameState => {
       [Gem.Sapphire]: n.blue - currentPlayerCards[Gem.Onyx],
       [Gem.Gold]: 0,
     }
-  })
+  });
 
-  const desiredCards = (getVisibleCards(game.decks).map(card => {
+  const desiredCards: { card: Card, desirability: number }[] = [];
+  for (const card of getVisibleCards(game.decks)) {
     // currently able to see current and next turn only
     const numberOfTurnsUntilCanAfford = getNumberOfTurnsUntilPlayerCanAffordCard(game.players[game.currentPlayerIndex], game.bank, card);
     if (numberOfTurnsUntilCanAfford !== undefined) {
@@ -116,15 +117,14 @@ const takeWiseTurn = (game: GameState): GameState => {
         }
       }
 
-      return {
+      desiredCards.push({
         card,
         desirability: card.points * 20 + nobleValue - (chipsRequiredFromPlayerBank * 5) - (numberOfTurnsUntilCanAfford * 10)
-      }
-    } else {
-      return undefined;
+      });
     }
-  }).filter(d => d !== undefined) as { card: Card, desirability: number }[])
-    .sort((a, b) => b.desirability - a.desirability); // sorts descending
+  }
+
+  desiredCards.sort((a, b) => b.desirability - a.desirability); // sorts descending
 
   for (let index = 0; index < desiredCards.length; index++) {
     const desiredCard = desiredCards[index].card;
