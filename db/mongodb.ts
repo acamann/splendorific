@@ -1,4 +1,4 @@
-import { MongoClient, WithId } from 'mongodb';
+import { Document, MongoClient, WithId } from 'mongodb';
 import { version } from './../package.json';
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
@@ -20,15 +20,12 @@ const saveDocuments = async (collection: string, documents: {}[]) => {
   await client.close();
 }
 
-const dequeue = async <T>(collection: string): Promise<WithId<T> | undefined> => {
+const dequeue = async <TSchema extends Document>(collection: string): Promise<WithId<TSchema> | undefined> => {
   await client.connect();
-  const collectionClient = client.db(database).collection(collection);
-  const foundItem = await collectionClient.findOne<WithId<T>>() ?? undefined;
-  if (foundItem) {
-    await collectionClient.deleteOne({ _id: foundItem._id });
-  }
+  const collectionClient = client.db(database).collection<TSchema>(collection);
+  const foundItem = await collectionClient.findOneAndDelete({});
   await client.close();
-  return foundItem;
+  return foundItem.value ?? undefined;
 }
 
 export const saveSimulationToDB = async (simulation: {}) =>
