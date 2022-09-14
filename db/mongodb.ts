@@ -30,7 +30,9 @@ const getDocuments = async <TSchema extends Document>(collection: string, filter
   if (limit) {
     cursor = cursor.limit(limit);
   }
-  return await cursor.toArray();
+  const result = await cursor.toArray();
+  await client.close();
+  return result;
 }
 
 const dequeue = async <TSchema extends Document>(collection: string): Promise<WithId<TSchema> | undefined> => {
