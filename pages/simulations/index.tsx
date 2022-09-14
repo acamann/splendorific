@@ -1,4 +1,4 @@
-import type { NextPage } from 'next'
+import type { NextPage, NextPageContext } from 'next'
 import Head from 'next/head'
 import { getQueuedSimulations, getSimulationResults, SimulationRequest, SimulationResult } from '../../db/mongodb';
 
@@ -43,7 +43,9 @@ const Simulations: NextPage<SimulationPageProps> = ({ simulationQueue, simulatio
   )
 }
 
-export async function getStaticProps(): Promise<{ props: SimulationPageProps }> {
+export async function getServerSideProps({ res }: NextPageContext): Promise<{ props: SimulationPageProps }> {
+  res?.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=59');
+
   // JSON stringify and parse doesn't seem like proper solution - https://stackoverflow.com/a/67466645
   return {
     props: {
