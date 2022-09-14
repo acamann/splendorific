@@ -1,31 +1,30 @@
-import { Handler } from "@netlify/functions";
-import { takeTurnAI } from "../../ai";
-import { saveSimulationToDB, tryDequeueSimulationRequest } from "../../db/mongodb";
-import { getRandomGame, initialPlayerState } from "../../gameState";
-import { Player } from "../../models";
+import { NextApiRequest, NextApiResponse } from "next";
+import { takeTurnAI } from "../../../ai";
+import { saveSimulationToDB, tryDequeueSimulationRequest } from "../../../db/mongodb";
+import { getRandomGame, initialPlayerState } from "../../../gameState";
+import { Player } from "../../../models";
 
-export const handler: Handler = async (event, context) => {
-  // get and remove next request from db queue
-  const request = await tryDequeueSimulationRequest();
-  if (!request) {
-    // if there is not one, return
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "No Simulation Requests Queued" })
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method === 'GET') {
+    // get and remove next request from db queue
+    const request = await tryDequeueSimulationRequest();
+    if (!request) {
+      // if there is not one, return
+      res.status(204).send({ message: "No Simulation Requests Queued"})
+      return;
     }
-  }
 
-  // run & save simulation result to db
-  const simulation = simulate(request.games, request.players.map(p => p.aiExperience));
-  const id = await saveSimulationToDB(simulation);
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "Successful simulation",
-      id
-    })
+    // run & save simulation result to db
+    const simulation = simulate(request.games, request.players.map(p => p.aiExperience));
+    await saveSimulationToDB(simulation);
+    res.status(200).send({ message: "Successful simulation", input: request, result: simulation });
+  } else {
+    return res.status(405).send({ message: "Use GET method to run single queued simulation"});
   }
-};
+}
 
 interface SimulationResponse {
   games: number;
@@ -41,17 +40,11 @@ interface SimulationResponse {
   gameLog?: string[][];
 }
 
+interface PlayerResults { wins: number, points: number, nobles: number };
+
 const simulate = (numberOfGames: number, playerExperiences: number[]): SimulationResponse => {
   const numberOfPlayers = playerExperiences.length;
-  const playerResults: {
-    wins: number,
-    points: number,
-    nobles: number
-  }[] = Array(numberOfPlayers).fill({
-    wins: 0,
-    points: 0,
-    nobles: 0
-  });
+  const playerResults: PlayerResults[] = Array.from({ length: numberOfPlayers }, () => ({ wins: 0, points: 0, nobles: 0 }));
   const failures: string[] = [];
   let totalTurns = 0;
   for (let gameIndex = 0; gameIndex < numberOfGames; gameIndex++)
