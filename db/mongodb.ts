@@ -1,4 +1,4 @@
-import { Document, MongoClient, WithId } from 'mongodb';
+import { Document, Filter, MongoClient, Sort, WithId } from 'mongodb';
 import { version } from './../package.json';
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/?retryWrites=true&w=majority`;
@@ -18,6 +18,21 @@ const saveDocuments = async (collection: string, documents: {}[]) => {
   const collectionClient = client.db(database).collection(collection);
   await collectionClient.insertMany(documents);
   await client.close();
+}
+
+const getDocuments = async <TSchema extends Document>(collection: string, filter: Filter<TSchema> = {}, sort?: Sort, limit?: number): Promise<WithId<TSchema>[]> => {
+  await client.connect();
+  const collectionClient = client.db(database).collection<TSchema>(collection);  
+  let cursor = collectionClient.find(filter);
+  if (sort) {
+    cursor = cursor.sort(sort);
+  }
+  if (limit) {
+    cursor = cursor.limit(limit);
+  }
+  const result = await cursor.toArray();
+  await client.close();
+  return result;
 }
 
 const dequeue = async <TSchema extends Document>(collection: string): Promise<WithId<TSchema> | undefined> => {
@@ -43,7 +58,7 @@ export const saveGameToDB = async (gameData: {}) =>
   });
 
 type PlayerConfiguration = { aiExperience: number };
-type SimulationRequest = { games: number, players: PlayerConfiguration[] }
+export type SimulationRequest = { games: number, players: PlayerConfiguration[] }
 
 export const queueSimulations = async (requests: SimulationRequest[]) =>
   await saveDocuments("Simulation Queue", requests);
@@ -51,3 +66,24 @@ export const queueSimulations = async (requests: SimulationRequest[]) =>
 export const tryDequeueSimulationRequest = async (): Promise<SimulationRequest | undefined> => {
   return await dequeue<SimulationRequest>("Simulation Queue");
 }
+
+export const getQueuedSimulations = async (): Promise<WithId<SimulationRequest>[]> =>
+  await getDocuments<SimulationRequest>("Simulation Queue");
+
+export type SimulationResult = {
+  timestamp: number;
+  version: string;
+  games: number;
+  players: {
+    experience: number;
+    wins: number;
+    winPercentage: number;
+    averagePoints: number;
+    averageNobles: number;
+  }[];
+  averageTurns: number;
+  failures?: string[];
+}
+
+export const getSimulationResults = async (): Promise<WithId<SimulationResult>[]> =>
+  await getDocuments<SimulationResult>("Simulations", undefined, { timestamp: -1 }, 120);
