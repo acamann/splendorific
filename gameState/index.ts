@@ -74,7 +74,7 @@ export const getRandomGame = (players: Player[]): GameState => {
     [Gem.Emerald]: bankChips,
     [Gem.Ruby]: bankChips,
     [Gem.Sapphire]: bankChips,
-    [Gem.Gold]: 7, // leave the gold chips alone
+    [Gem.Gold]: 5, // constant 5 gold no matter how many players
   }
 
   const nobles = nobleDeck.slice(0, noblesCount);
