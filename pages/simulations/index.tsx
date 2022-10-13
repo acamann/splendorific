@@ -1,5 +1,7 @@
 import type { NextPage, NextPageContext } from 'next'
 import Head from 'next/head'
+import { useState } from 'react';
+import Modal from '../../components/Modal';
 import { getQueuedSimulations, getSimulationResults, SimulationRequest, SimulationResult } from '../../db/mongodb';
 
 type SimulationPageProps = {
@@ -8,6 +10,7 @@ type SimulationPageProps = {
 }
 
 const Simulations: NextPage<SimulationPageProps> = ({ simulationQueue, simulations }) => {
+  const [showDetail, setShowDetail] = useState<SimulationResult>();
   return (
     <>
       <Head>
@@ -15,6 +18,9 @@ const Simulations: NextPage<SimulationPageProps> = ({ simulationQueue, simulatio
         <meta name="description" content="Splendor clone" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Modal title="Simulation Details" isShowing={showDetail !== undefined} hide={() => setShowDetail(undefined)}>
+        <pre>{JSON.stringify(showDetail, null, 2)}</pre>
+      </Modal>
       <main style={{ display: "flex", gap: 24, padding: 24 }}>
         <div style={{ flexBasis: "25%", background: "white", padding: 16, maxHeight: "90vh" }}>
           <h2 style={{ padding: 0, margin : 0 }}>Simulation Queue ({simulationQueue.length})</h2>
@@ -31,6 +37,7 @@ const Simulations: NextPage<SimulationPageProps> = ({ simulationQueue, simulatio
           <ol style={{ overflowY: "auto", maxHeight: "90%", margin: 0, padding: 0 }}>
             {simulations.map((s, i) => 
               <li key={i} style={{ padding: "8px 0", listStyle: "none", margin: 0, display: "flex", gap: 24, fontSize: "0.9em" }}>
+                <button onClick={() => setShowDetail(s)}>more...</button>
                 <div>{`${new Date(s.timestamp).toLocaleString()}`}</div>
                 <div>{`${s.games} games, ${s.players.length} players`}</div>
                 {s.players.map((p, i) => <div key={i}>{`${Math.round(p.experience * 100)} => ${Math.round(p.winPercentage * 100)}%`}</div>)}
