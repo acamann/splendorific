@@ -11,7 +11,7 @@ import {
   Player
 } from "../models";
 import { shuffle } from "../utils/array";
-import { encodeInitialDecks } from "./encoding";
+import { encodePurchaseCard, encodeInitialDecks, encodeTakeChips, encodeReserveCard, encodePurchaseReservedCard, decodeTurnLog } from "./encoding";
 import {
   getBankValueOfCards,
   getEmptyBank,
@@ -165,7 +165,7 @@ export const takeTurnPurchaseCard = (game: GameState, cardToPurchase: Card): Gam
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
     verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} purchased card: (${cardToString(cardToPurchase)}). Total points: ${playerPoints}`],
-    log: [...game.log, `${game.currentPlayerIndex}p${cardToPurchase.level}.${cardToPurchase.id}${spent.map(g => getGemName(g).charAt(0)).join("")}+${cardToPurchase.points}${earnedNobles.map(n => `n${n.id}+${n.points}`)}|${playerPoints}`]
+    log: [...game.log, encodePurchaseCard(game.currentPlayerIndex, cardToPurchase, spent, earnedNobles, playerPoints)]
   }
 
   return {
@@ -193,7 +193,7 @@ export const takeTurnTakeChips = (game: GameState, chipsToTake: Gem[]) => {
     }) : player),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
     verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} took chips: ${chipsToTake.map(c => getGemName(c)).join(", ")}.`],
-    log: [...game.log, `${game.currentPlayerIndex}g${chipsToTake.map(c => getGemName(c).charAt(0)).join("")}`]
+    log: [...game.log, encodeTakeChips(game.currentPlayerIndex, chipsToTake)]
   };
 
   return {
@@ -240,7 +240,7 @@ export const takeTurnReserveCard = (game: GameState, cardToReserve: Card) => {
     },
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
     verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} reserved card: (${cardToString(cardToReserve)}).`],
-    log: [...game.log, `${game.currentPlayerIndex}r${cardToReserve.level}.${cardToReserve.id}${isGoldAvailable ? "g" : ""}`]
+    log: [...game.log, encodeReserveCard(game.currentPlayerIndex, cardToReserve, isGoldAvailable)]
   }
 
   return {
@@ -304,7 +304,7 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
     nobles: game.nobles.filter(n => !earnedNobles.includes(n)),
     currentPlayerIndex: getNextPlayerIndex(game.currentPlayerIndex, game.players.length),
     verboseLog: [...game.verboseLog, `${game.players[game.currentPlayerIndex].name} purchased reserved card: (${cardToString(reservedCardToPurchase)}). Total points: ${playerPoints}`],
-    log: [...game.log, `${game.currentPlayerIndex}pr${reservedCardToPurchase.level}.${reservedCardToPurchase.id}${spent.map(g => getGemName(g).charAt(0)).join("")}+${reservedCardToPurchase.points}${earnedNobles.map(n => `n${n.id}+${n.points}`)}|${playerPoints}`]
+    log: [...game.log, encodePurchaseReservedCard(game.currentPlayerIndex, reservedCardToPurchase, spent, earnedNobles, playerPoints)]
   }
 
   return {
@@ -312,3 +312,30 @@ export const takeTurnPurchaseReservedCard = (game: GameState, reservedCardToPurc
     winningPlayerIndex: getWinningPlayerIndex(newGameState),
   }
 }
+
+const findCardByLevelAndId = (decks: Decks, cardLevel: 1 | 2 | 3, cardId: number): Card => {
+  const card = decks[cardLevel].find(d => d.id === cardId);
+  if (!card) {
+    throw new Error(`Invalid Card: Lvl=${cardLevel}, Id=${cardId}`);
+  }
+  return card;
+}
+
+export const processTurnLog = (game: GameState, log: string): GameState => {
+  const turn = decodeTurnLog(log);
+  if (turn.playerIndex !== game.currentPlayerIndex) {
+    throw new Error("Wrong Player");
+  }
+
+  if (turn.type === "chips") {
+    return takeTurnTakeChips(game, turn.chips);
+  } else if (turn.type === "purchase") {
+    return takeTurnPurchaseCard(game, findCardByLevelAndId(game.decks, turn.cardLevel, turn.cardId));
+  } else if (turn.type === "purchase-reserved") {
+    return takeTurnPurchaseReservedCard(game, findCardByLevelAndId(game.decks, turn.cardLevel, turn.cardId));
+  } else if (turn.type === "reserve") {
+    return takeTurnReserveCard(game, findCardByLevelAndId(game.decks, turn.cardLevel, turn.cardId));
+  }
+
+  return game;
+} 
